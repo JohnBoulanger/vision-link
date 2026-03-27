@@ -10,18 +10,20 @@ const qualificationRoutes = require("./routes/qualifications");
 const systemsRoutes = require("./routes/system");
 const negotiationRoutes = require("./routes/negotiations");
 
-const cors = require("cors")
-
-// Set up cors to allow requests from frontend
-app.use(cors({
-origin: 'http://localhost:5173',
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
-}));
+const cors = require("cors");
 
 function create_app() {
   const app = express();
+
+  // Set up cors to allow requests from frontend
+  app.use(
+    cors({
+      origin: "http://localhost:5173",
+      methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+      allowedHeaders: ["Content-Type", "Authorization"],
+      credentials: true,
+    })
+  );
 
   app.use(express.json());
   app.use("/auth", authRoutes);

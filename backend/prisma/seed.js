@@ -234,11 +234,11 @@ async function main() {
     jobRecords.push(job);
   }
 
-  // 5 filled jobs (past dates, with a worker assigned)
+  // 5 filled jobs — worker's first qualification position type matches the job
   for (let i = 0; i < 5; i++) {
     const biz = businessIds[i % 8];
-    const ptIndex = (i + 3) % positionTypeIds.length;
-    const workerIndex = i; // first 5 users
+    const workerIndex = i;
+    const ptIndex = workerIndex % positionTypeIds.length; // matches user i's first qual
     const job = await prisma.job.create({
       data: {
         businessId: biz,
@@ -255,10 +255,11 @@ async function main() {
     jobRecords.push(job);
   }
 
-  // 5 completed jobs
+  // 5 completed jobs — worker's first qualification position type matches the job
   for (let i = 0; i < 5; i++) {
     const biz = businessIds[(i + 2) % 8];
-    const ptIndex = (i + 5) % positionTypeIds.length;
+    const workerIndex = 5 + i;
+    const ptIndex = workerIndex % positionTypeIds.length; // matches user (5+i)'s first qual
     const job = await prisma.job.create({
       data: {
         businessId: biz,
@@ -268,7 +269,7 @@ async function main() {
         start_time: pastDate(20 + i, 9),
         end_time: pastDate(20 + i, 17),
         status: 'completed',
-        workerId: regularIds[5 + i],
+        workerId: regularIds[workerIndex],
         note: `Completed shift for ${POSITION_TYPES[ptIndex].name}.`,
       },
     });
@@ -420,11 +421,11 @@ async function main() {
     }
   }
 
-  // A couple of failed negotiations
+  // Failed negotiations from mutual interests
   const mutualInterests = interestRecords.filter(
     ir => ir.userInterested === true && ir.businessInterested === true
   );
-  for (let i = 0; i < Math.min(2, mutualInterests.length); i++) {
+  for (let i = 0; i < Math.min(4, mutualInterests.length); i++) {
     const interest = mutualInterests[i];
     const job = jobRecords.find(j => j.id === interest.jobId);
     if (job) {
@@ -435,16 +436,76 @@ async function main() {
           businessId: job.businessId,
           interestId: interest.id,
           status: 'failed',
-          candidateDecision: 'accept',
-          businessDecision: 'decline',
-          expiresAt: pastDate(1, 12),
+          candidateDecision: i % 2 === 0 ? 'accept' : 'decline',
+          businessDecision: i % 2 === 0 ? 'decline' : 'accept',
+          expiresAt: pastDate(1 + i, 12),
         },
       });
       negCount++;
     }
   }
 
+  // More failed negotiations from additional interests to hit pagination (11+)
+  // Create dedicated interests for these
+  for (let i = 0; i < 5; i++) {
+    const job = openJobs[(i + 12) % openJobs.length];
+    const userId = regularIds[i % 15];
+    try {
+      const interest = await prisma.interest.create({
+        data: {
+          jobId: job.id,
+          userId: userId,
+          userInterested: true,
+          businessInterested: true,
+        },
+      });
+      await prisma.negotiation.create({
+        data: {
+          jobId: job.id,
+          userId: userId,
+          businessId: job.businessId,
+          interestId: interest.id,
+          status: 'failed',
+          candidateDecision: 'decline',
+          businessDecision: null,
+          expiresAt: pastDate(2 + i, 10),
+        },
+      });
+      negCount++;
+    } catch (e) {
+      // skip if duplicate interest
+    }
+  }
+
+  // Add negotiation messages to the successful negotiations
+  let msgCount = 0;
+  const successNegs = await prisma.negotiation.findMany({
+    where: { status: 'success' },
+  });
+  const chatMessages = [
+    'Hi! I can confirm I\'m available for this shift.',
+    'Great, thanks for confirming. Could you arrive 10 minutes early?',
+    'Absolutely, I\'ll be there early.',
+    'Perfect. Looking forward to working with you!',
+    'See you then!',
+  ];
+  for (const neg of successNegs) {
+    for (let m = 0; m < chatMessages.length; m++) {
+      const senderAccountId = m % 2 === 0 ? neg.userId : neg.businessId;
+      await prisma.negotiationMessage.create({
+        data: {
+          negotiationId: neg.id,
+          senderAccountId: senderAccountId,
+          text: chatMessages[m],
+          createdAt: new Date(neg.createdAt.getTime() + m * 60000),
+        },
+      });
+      msgCount++;
+    }
+  }
+
   console.log(`Created ${negCount} negotiations`);
+  console.log(`Created ${msgCount} negotiation messages`);
   console.log('\nSeed complete!');
   console.log(`Password for all accounts: ${PASSWORD}`);
 }
