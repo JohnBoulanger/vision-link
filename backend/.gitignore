@@ -1,0 +1,43 @@
+# macOS
+.DS_Store
+._*
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+*.out
+
+# Env
+.env
+.env.*
+!.env.example
+
+# Prisma
+prisma/dev*
+migration_lock.toml
+
+# Editor
+.vscode/
+*.swp
+*~
+
+# Claude
+CLAUDE.md
+
+# Coverage / test
+coverage/
+
+# Build / temp
+dist/
+build/
+tmp/
+temp/
+
+# Lock files (only ignore if course does not require them)
+package-lock.json
+
+# OS / misc
+Thumbs.db

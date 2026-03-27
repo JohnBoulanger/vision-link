@@ -1,0 +1,192 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  regular
+  business
+  admin
+}
+
+enum QualificationStatus {
+  created
+  submitted
+  approved
+  rejected
+  revised
+}
+
+enum JobStatus {
+  open
+  expired
+  filled
+  cancelled
+  completed
+}
+
+enum NegotiationStatus {
+  active
+  success
+  failed
+}
+
+enum Decision {
+  accept
+  decline
+}
+
+model Account {
+  id                  Int                  @id @default(autoincrement())
+  email               String               @unique
+  password            String
+  role                Role
+  activated           Boolean              @default(false)
+  createdAt           DateTime             @default(now())
+  user                RegularUser?
+  business            Business?
+  administrator       Administrator?
+  tokens              ResetToken[]
+  negotiationMessages NegotiationMessage[]
+}
+
+model RegularUser {
+  accountId      Int             @id
+  account        Account         @relation(fields: [accountId], references: [id])
+  first_name     String
+  last_name      String
+  phone_number   String?
+  postal_address String?
+  birthday       DateTime?
+  avatar         String?
+  resume         String?
+  biography      String?
+  suspended      Boolean         @default(false)
+  available      Boolean         @default(false)
+  lastActiveAt   DateTime?
+  qualifications Qualification[]
+  jobs           Job[]           @relation("WorkerJobs")
+  interests      Interest[]
+  negotiations   Negotiation[]
+}
+
+model Business {
+  accountId      Int           @id
+  account        Account       @relation(fields: [accountId], references: [id])
+  business_name  String
+  owner_name     String
+  phone_number   String
+  postal_address String
+  lon            Float
+  lat            Float
+  avatar         String?
+  biography      String?
+  verified       Boolean       @default(false)
+  jobs           Job[]
+  negotiations   Negotiation[]
+}
+
+model Administrator {
+  accountId Int     @id
+  account   Account @relation(fields: [accountId], references: [id])
+}
+
+model ResetToken {
+  token     String   @id @default(uuid())
+  accountId Int
+  account   Account  @relation(fields: [accountId], references: [id])
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model PositionType {
+  id             Int             @id @default(autoincrement())
+  name           String
+  description    String
+  hidden         Boolean         @default(true)
+  qualifications Qualification[]
+  jobs           Job[]
+}
+
+model Qualification {
+  id             Int                 @id @default(autoincrement())
+  user           RegularUser         @relation(fields: [userId], references: [accountId])
+  userId         Int
+  position       PositionType        @relation(fields: [positionTypeId], references: [id])
+  positionTypeId Int
+  status         QualificationStatus
+  note           String              @default("")
+  document       String?
+  updatedAt      DateTime            @updatedAt
+
+  @@unique([userId, positionTypeId])
+}
+
+model Job {
+  id             Int           @id @default(autoincrement())
+  business       Business      @relation(fields: [businessId], references: [accountId])
+  businessId     Int
+  positionType   PositionType  @relation(fields: [positionTypeId], references: [id])
+  positionTypeId Int
+  worker         RegularUser?  @relation("WorkerJobs", fields: [workerId], references: [accountId])
+  workerId       Int?
+  note           String        @default("")
+  salary_min     Float
+  salary_max     Float
+  start_time     DateTime
+  end_time       DateTime
+  status         JobStatus     @default(open)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  interests      Interest[]
+  negotiations   Negotiation[]
+}
+
+model Interest {
+  id                 Int           @id @default(autoincrement())
+  job                Job           @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  jobId              Int
+  user               RegularUser   @relation(fields: [userId], references: [accountId])
+  userId             Int
+  userInterested     Boolean?
+  businessInterested Boolean?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  negotiations       Negotiation[]
+
+  @@unique([jobId, userId])
+}
+
+model Negotiation {
+  id                  Int                  @id @default(autoincrement())
+  job                 Job                  @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  jobId               Int
+  user                RegularUser          @relation(fields: [userId], references: [accountId])
+  userId              Int
+  business            Business             @relation(fields: [businessId], references: [accountId])
+  businessId          Int
+  interest            Interest             @relation(fields: [interestId], references: [id])
+  interestId          Int
+  status              NegotiationStatus
+  candidateDecision   Decision?
+  businessDecision    Decision?
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  expiresAt           DateTime
+  negotiationMessages NegotiationMessage[]
+}
+
+model NegotiationMessage {
+  id              Int         @id @default(autoincrement())
+  negotiation     Negotiation @relation(fields: [negotiationId], references: [id], onDelete: Cascade)
+  negotiationId   Int
+  sender          Account     @relation(fields: [senderAccountId], references: [id])
+  senderAccountId Int
+  text            String
+  createdAt       DateTime    @default(now())
+}
