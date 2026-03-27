@@ -3,7 +3,7 @@ import "./App.css";
 import Layout from "./components/Layout";
 import Landing from "./pages/Public/Landing";
 import NotFound from "./pages/NotFound";
-import { AuthProvider } from "./contexts/AuthContext/AuthContext";
+import AuthProvider from "./contexts/AuthContext/AuthProvider";
 
 function App() {
   return (
