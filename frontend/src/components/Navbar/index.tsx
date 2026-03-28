@@ -8,6 +8,8 @@ export default function Navbar() {
         <Link to="/">Home</Link>
         <Link to="/businessList">Business List</Link>
         <Link to="/businessProfile">Business Profile</Link>
+        <Link to="/login">Login</Link>
+        <Link to="/registerUser">Register</Link>
       </header>
     </>
   );
