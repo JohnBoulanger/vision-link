@@ -42,7 +42,13 @@ export default function BusinessJobDetail() {
 
   // inline edit state
   const [editing, setEditing] = useState(false);
-  const [editForm, setEditForm] = useState({ salary_min: "", salary_max: "", start_time: "", end_time: "", note: "" });
+  const [editForm, setEditForm] = useState({
+    salary_min: "",
+    salary_max: "",
+    start_time: "",
+    end_time: "",
+    note: "",
+  });
   const [editSaving, setEditSaving] = useState(false);
   const [editError, setEditError] = useState("");
 
@@ -75,9 +81,7 @@ export default function BusinessJobDetail() {
       .finally(() => setLoading(false));
   }, [jobId]);
 
-  function handleEditChange(
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) {
+  function handleEditChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
     setEditForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   }
 
@@ -130,9 +134,7 @@ export default function BusinessJobDetail() {
       setEditing(false);
     } catch (err) {
       setEditError(
-        axios.isAxiosError(err)
-          ? err.response?.data?.error || "Save failed."
-          : "Save failed."
+        axios.isAxiosError(err) ? err.response?.data?.error || "Save failed." : "Save failed."
       );
     } finally {
       setEditSaving(false);
@@ -147,9 +149,7 @@ export default function BusinessJobDetail() {
       navigate("/business/jobs");
     } catch (err) {
       setActionError(
-        axios.isAxiosError(err)
-          ? err.response?.data?.error || "Delete failed."
-          : "Delete failed."
+        axios.isAxiosError(err) ? err.response?.data?.error || "Delete failed." : "Delete failed."
       );
       setConfirmDelete(false);
     } finally {
@@ -165,9 +165,7 @@ export default function BusinessJobDetail() {
       setJob((prev) => (prev ? { ...prev, status: res.data.status } : prev));
     } catch (err) {
       setActionError(
-        axios.isAxiosError(err)
-          ? err.response?.data?.error || "Action failed."
-          : "Action failed."
+        axios.isAxiosError(err) ? err.response?.data?.error || "Action failed." : "Action failed."
       );
     } finally {
       setActionLoading(false);
@@ -179,7 +177,9 @@ export default function BusinessJobDetail() {
     return (
       <div className="BusinessJobDetail page-enter">
         <p className="error-message">{error}</p>
-        <Link to="/business/jobs" className="back-link">← My jobs</Link>
+        <Link to="/business/jobs" className="back-link">
+          ← My jobs
+        </Link>
       </div>
     );
   }
@@ -187,8 +187,7 @@ export default function BusinessJobDetail() {
 
   const isOpen = job.status === "open";
   // delete is only valid on open/expired jobs with no active negotiations
-  const isDeletable =
-    (job.status === "open" || job.status === "expired") && !hasActiveNeg;
+  const isDeletable = (job.status === "open" || job.status === "expired") && !hasActiveNeg;
   // no-show is available when job is filled and we're currently in the shift window
   const now = Date.now();
   const canNoShow =
@@ -199,7 +198,9 @@ export default function BusinessJobDetail() {
   return (
     <div className="BusinessJobDetail page-enter">
       <div className="bjd-nav">
-        <Link to="/business/jobs" className="back-link">← My jobs</Link>
+        <Link to="/business/jobs" className="back-link">
+          ← My jobs
+        </Link>
         <div className="bjd-sub-links">
           <Link to={`/business/jobs/${jobId}/candidates`} className="btn-secondary btn-sm">
             Candidates
@@ -230,7 +231,9 @@ export default function BusinessJobDetail() {
             <div className="bjd-grid">
               <div className="bjd-item">
                 <span className="detail-label">Salary</span>
-                <span>${job.salary_min.toLocaleString()}–${job.salary_max.toLocaleString()}/hr</span>
+                <span>
+                  ${job.salary_min.toLocaleString()}–${job.salary_max.toLocaleString()}/hr
+                </span>
               </div>
               <div className="bjd-item">
                 <span className="detail-label">Start</span>
@@ -327,7 +330,10 @@ export default function BusinessJobDetail() {
               <button
                 type="button"
                 className="btn-secondary btn-sm"
-                onClick={() => { setEditing(false); setEditError(""); }}
+                onClick={() => {
+                  setEditing(false);
+                  setEditError("");
+                }}
               >
                 Cancel
               </button>
@@ -357,10 +363,7 @@ export default function BusinessJobDetail() {
                   >
                     {actionLoading ? "Deleting..." : "Yes, delete"}
                   </button>
-                  <button
-                    className="btn-secondary btn-sm"
-                    onClick={() => setConfirmDelete(false)}
-                  >
+                  <button className="btn-secondary btn-sm" onClick={() => setConfirmDelete(false)}>
                     Cancel
                   </button>
                 </div>
@@ -374,11 +377,7 @@ export default function BusinessJobDetail() {
 
           {/* no-show: mark worker as no-show during the shift window */}
           {canNoShow && (
-            <button
-              className="btn-danger btn-sm"
-              onClick={handleNoShow}
-              disabled={actionLoading}
-            >
+            <button className="btn-danger btn-sm" onClick={handleNoShow} disabled={actionLoading}>
               {actionLoading ? "Processing..." : "Mark no-show"}
             </button>
           )}

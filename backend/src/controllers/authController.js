@@ -6,13 +6,13 @@ async function authenticateAccount(req, res) {
     const { email, password } = req.body;
     // didnt provide email or password
     if (!email || !password) {
-      return res.status(400).json({ error: "Bad Request" });
+      return res.status(400).json({ error: "Email and password are required" });
     }
     const result = await AuthService.authenticateAccount(email, password);
     return res.status(200).json(result);
   } catch (error) {
     if (error.type === "unauthorized") {
-      return res.status(401).json({ error: "Unauthorized" });
+      return res.status(401).json({ error: "Invalid email or password" });
     }
     if (error.type === "forbidden") {
       return res.status(403).json({ error: "Account Not Activated" });
@@ -26,16 +26,18 @@ async function createResetToken(req, res) {
     // check if email is valid
     const { email } = req.body;
     if (!email) {
-      return res.status(400).json({ error: "Bad Request" });
+      return res.status(400).json({ error: "Email address is required" });
     }
     const resetToken = await AuthService.createResetToken(email, req.ip);
     return res.status(202).json(resetToken);
   } catch (error) {
     if (error.type === "not_found") {
-      return res.status(404).json({ error: "Not Found" });
+      return res.status(404).json({ error: "No account found with this email address" });
     }
     if (error.type === "rate_limit") {
-      return res.status(429).json({ error: "Too Many Requests" });
+      return res
+        .status(429)
+        .json({ error: "Please wait before requesting another password reset" });
     }
     return res.status(500).json({ error: "Internal Server Error" });
   }
@@ -46,7 +48,7 @@ async function useResetToken(req, res) {
     const { email, password } = req.body;
     const { resetToken } = req.params;
     if (!email) {
-      return res.status(400).json({ error: "Bad Request" });
+      return res.status(400).json({ error: "Email address is required" });
     }
     const response = await AuthService.useResetToken(email, password, resetToken);
     return res.status(200).json(response);
@@ -55,13 +57,13 @@ async function useResetToken(req, res) {
       return res.status(401).json({ error: "Invalid Password Format" });
     }
     if (error.type === "unauthorized") {
-      return res.status(401).json({ error: "Unauthorized" });
+      return res.status(401).json({ error: "Email does not match this reset token" });
     }
     if (error.type === "not_found") {
-      return res.status(404).json({ error: "Not Found" });
+      return res.status(404).json({ error: "Reset token not found or has already been used" });
     }
     if (error.type === "gone") {
-      return res.status(410).json({ error: "Gone" });
+      return res.status(410).json({ error: "This reset token has expired" });
     }
 
     return res.status(500).json({ error: "Internal Server Error" });

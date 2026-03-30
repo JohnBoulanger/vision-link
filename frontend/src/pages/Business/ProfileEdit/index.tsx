@@ -44,7 +44,13 @@ export default function BusinessProfileEdit() {
           lon: d.location?.lon != null ? String(d.location.lon) : "",
         });
       })
-      .catch(() => setError("Failed to load profile."))
+      .catch((err) =>
+        setError(
+          axios.isAxiosError(err)
+            ? err.response?.data?.error || "Failed to load profile."
+            : "Failed to load profile."
+        )
+      )
       .finally(() => setLoading(false));
   }, []);
 
@@ -131,12 +137,7 @@ export default function BusinessProfileEdit() {
 
           <label className="profile-edit-label">
             Owner name
-            <input
-              name="owner_name"
-              type="text"
-              value={form.owner_name}
-              onChange={handleChange}
-            />
+            <input name="owner_name" type="text" value={form.owner_name} onChange={handleChange} />
           </label>
 
           <label className="profile-edit-label">

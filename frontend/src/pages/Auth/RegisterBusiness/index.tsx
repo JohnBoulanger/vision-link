@@ -147,11 +147,7 @@ export default function RegisterBusiness() {
           />
 
           {/* address autocomplete — populates postal_address, lat, lon on selection */}
-          <AddressSearch
-            placeholder="Clinic address"
-            onSelect={handleAddressSelect}
-            required
-          />
+          <AddressSearch placeholder="Clinic address" onSelect={handleAddressSelect} required />
 
           {/* lat/lon are auto-filled by autocomplete; editable for manual override */}
           <div className="form-row">

@@ -48,26 +48,26 @@
 
 /* dark mode — .dark class on <html> has higher specificity than :root */
 html.dark {
-    --bg: #14181a;
-    --bg-surface: #1c2120;
-    --bg-elevated: #222a27;
-    --text: #8a9e8c;
-    --text-strong: #dfe8de;
-    --text-muted: #5c6e5d;
-    --border: #2e3a30;
-    --border-light: #263028;
-    --accent: #4a8c63;
-    --accent-hover: #6aaa82;
-    --accent-subtle: rgba(74, 140, 99, 0.12);
-    --accent2: #8dc842;
-    --accent2-hover: #a8e05a;
-    --accent2-subtle: rgba(141, 200, 66, 0.14);
-    --error: #e5383b;
-    --error-bg: rgba(229, 56, 59, 0.1);
-    --success: #52b788;
-    --success-bg: rgba(82, 183, 136, 0.1);
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.25);
-    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.35);
+  --bg: #14181a;
+  --bg-surface: #1c2120;
+  --bg-elevated: #222a27;
+  --text: #8a9e8c;
+  --text-strong: #dfe8de;
+  --text-muted: #5c6e5d;
+  --border: #2e3a30;
+  --border-light: #263028;
+  --accent: #4a8c63;
+  --accent-hover: #6aaa82;
+  --accent-subtle: rgba(74, 140, 99, 0.12);
+  --accent2: #8dc842;
+  --accent2-hover: #a8e05a;
+  --accent2-subtle: rgba(141, 200, 66, 0.14);
+  --error: #e5383b;
+  --error-bg: rgba(229, 56, 59, 0.1);
+  --success: #52b788;
+  --success-bg: rgba(82, 183, 136, 0.1);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.25);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.35);
   /* derived surface aliases — dark mode overrides */
   --bg-base: var(--bg);
   --bg-hover: var(--bg-surface);

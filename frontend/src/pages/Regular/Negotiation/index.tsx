@@ -139,6 +139,17 @@ export default function Negotiation() {
         .catch(() => {});
     });
 
+    // other party made a decision — update state immediately without polling
+    socket.on(
+      "negotiation:updated",
+      (data: { id: number; status: string; decisions: { candidate: string | null; business: string | null } }) => {
+        setNegotiation((prev) =>
+          prev ? { ...prev, status: data.status, decisions: data.decisions } : prev
+        );
+        if (data.status !== "active") setHasActiveNeg(false);
+      }
+    );
+
     // socket-level errors
     socket.on("negotiation:error", (data: { message: string }) => {
       setDecisionError(data.message);

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import axios from "axios";
 import api from "../../../utils/api";
 import useDebounce from "../../../hooks/useDebounce";
 import Pagination from "../../../components/Pagination";
@@ -38,7 +39,13 @@ export default function AdminBusinesses() {
   const debouncedKeyword = useDebounce(keyword, 300);
 
   // track previous filter values to detect changes and reset page atomically
-  const prevFiltersRef = useRef({ debouncedKeyword, activatedFilter, verifiedFilter, sortField, sortOrder });
+  const prevFiltersRef = useRef({
+    debouncedKeyword,
+    activatedFilter,
+    verifiedFilter,
+    sortField,
+    sortOrder,
+  });
 
   // fetch businesses — resets to page 1 when filters change to avoid stale-page fetches
   useEffect(() => {
@@ -51,7 +58,13 @@ export default function AdminBusinesses() {
       prev.sortField !== sortField ||
       prev.sortOrder !== sortOrder
     ) {
-      prevFiltersRef.current = { debouncedKeyword, activatedFilter, verifiedFilter, sortField, sortOrder };
+      prevFiltersRef.current = {
+        debouncedKeyword,
+        activatedFilter,
+        verifiedFilter,
+        sortField,
+        sortOrder,
+      };
       activePage = 1;
       setPage(1);
     }
@@ -73,8 +86,12 @@ export default function AdminBusinesses() {
         const res = await api.get("/businesses", { params });
         setBusinesses(res.data.results);
         setCount(res.data.count);
-      } catch {
-        setError("Failed to load businesses.");
+      } catch (err) {
+        setError(
+          axios.isAxiosError(err)
+            ? err.response?.data?.error || "Failed to load businesses."
+            : "Failed to load businesses."
+        );
       } finally {
         setLoading(false);
       }
@@ -90,8 +107,12 @@ export default function AdminBusinesses() {
       setBusinesses((prev) =>
         prev.map((b) => (b.id === biz.id ? { ...b, verified: !b.verified } : b))
       );
-    } catch {
-      setError("Failed to update verification status.");
+    } catch (err) {
+      setError(
+        axios.isAxiosError(err)
+          ? err.response?.data?.error || "Failed to update verification status."
+          : "Failed to update verification status."
+      );
     } finally {
       setPendingId(null);
     }
@@ -104,7 +125,9 @@ export default function AdminBusinesses() {
       <div className="admin-page-header">
         <div>
           <h1>Businesses</h1>
-          <p className="admin-subtitle">{count} registered clinic{count !== 1 ? "s" : ""}</p>
+          <p className="admin-subtitle">
+            {count} registered clinic{count !== 1 ? "s" : ""}
+          </p>
         </div>
       </div>
 
@@ -117,22 +140,38 @@ export default function AdminBusinesses() {
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
         />
-        <select aria-label="Filter by activation" value={activatedFilter} onChange={(e) => setActivatedFilter(e.target.value)}>
+        <select
+          aria-label="Filter by activation"
+          value={activatedFilter}
+          onChange={(e) => setActivatedFilter(e.target.value)}
+        >
           <option value="">All activation</option>
           <option value="true">Activated</option>
           <option value="false">Not activated</option>
         </select>
-        <select aria-label="Filter by verification" value={verifiedFilter} onChange={(e) => setVerifiedFilter(e.target.value)}>
+        <select
+          aria-label="Filter by verification"
+          value={verifiedFilter}
+          onChange={(e) => setVerifiedFilter(e.target.value)}
+        >
           <option value="">All verification</option>
           <option value="true">Verified</option>
           <option value="false">Unverified</option>
         </select>
-        <select aria-label="Sort field" value={sortField} onChange={(e) => setSortField(e.target.value)}>
+        <select
+          aria-label="Sort field"
+          value={sortField}
+          onChange={(e) => setSortField(e.target.value)}
+        >
           <option value="business_name">Sort: name</option>
           <option value="owner_name">Sort: owner</option>
           <option value="email">Sort: email</option>
         </select>
-        <select aria-label="Sort order" value={sortOrder} onChange={(e) => setSortOrder(e.target.value)}>
+        <select
+          aria-label="Sort order"
+          value={sortOrder}
+          onChange={(e) => setSortOrder(e.target.value)}
+        >
           <option value="asc">A → Z</option>
           <option value="desc">Z → A</option>
         </select>
@@ -141,7 +180,13 @@ export default function AdminBusinesses() {
       {error && (
         <p className="error-message admin-error-dismissible">
           {error}
-          <button className="admin-error-dismiss" onClick={() => setError("")} aria-label="Dismiss error">✕</button>
+          <button
+            className="admin-error-dismiss"
+            onClick={() => setError("")}
+            aria-label="Dismiss error"
+          >
+            ✕
+          </button>
         </p>
       )}
 
@@ -174,12 +219,16 @@ export default function AdminBusinesses() {
                     <td>{biz.owner_name}</td>
                     <td className="admin-td-email">{biz.email}</td>
                     <td>
-                      <span className={`admin-badge ${biz.activated ? "badge-green" : "badge-grey"}`}>
+                      <span
+                        className={`admin-badge ${biz.activated ? "badge-green" : "badge-grey"}`}
+                      >
                         {biz.activated ? "activated" : "pending"}
                       </span>
                     </td>
                     <td>
-                      <span className={`admin-badge ${biz.verified ? "badge-green" : "badge-amber"}`}>
+                      <span
+                        className={`admin-badge ${biz.verified ? "badge-green" : "badge-amber"}`}
+                      >
                         {biz.verified ? "verified" : "unverified"}
                       </span>
                     </td>

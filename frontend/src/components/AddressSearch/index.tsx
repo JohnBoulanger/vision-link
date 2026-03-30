@@ -21,7 +21,7 @@ interface NominatimResult {
 
 interface Suggestion {
   placeId: number;
-  label: string;    // human-readable short label shown in dropdown + filled into input
+  label: string; // human-readable short label shown in dropdown + filled into input
   fullLabel: string; // full display_name passed to onSelect as canonical address
   lat: number;
   lon: number;

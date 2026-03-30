@@ -81,7 +81,9 @@
   color: var(--text-muted);
   cursor: pointer;
   border-radius: 4px;
-  transition: color 0.15s ease, background 0.15s ease;
+  transition:
+    color 0.15s ease,
+    background 0.15s ease;
 }
 
 .nav-settings-btn:hover {
@@ -123,7 +125,9 @@
   color: var(--text);
   cursor: pointer;
   text-align: left;
-  transition: background 0.1s ease, color 0.1s ease;
+  transition:
+    background 0.1s ease,
+    color 0.1s ease;
 }
 
 .nav-settings-option:hover {
@@ -156,8 +160,14 @@
 }
 
 @keyframes dropdown-in {
-  from { opacity: 0; transform: translateY(-4px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .nav-logout-confirm span {
@@ -172,7 +182,9 @@
   font-size: 0.8125rem;
   cursor: pointer;
   border: 1px solid var(--border);
-  transition: background 0.12s ease, color 0.12s ease;
+  transition:
+    background 0.12s ease,
+    color 0.12s ease;
 }
 
 .nav-logout-cancel {

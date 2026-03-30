@@ -13,7 +13,6 @@ html.dark .Landing::before {
   --dot-color: #1e2820;
 }
 
-
 .Landing {
   flex: 1;
   display: flex;
@@ -93,8 +92,13 @@ html.dark .Landing::before {
 
 /* gentle vertical bob for floating shapes */
 @keyframes decoFloat {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-12px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
 }
 
 /* ── hero ── */
@@ -194,8 +198,15 @@ html.dark .Landing::before {
 }
 
 @keyframes scrollPulse {
-  0%, 100% { opacity: 0.3; transform: scaleY(0.85); }
-  50% { opacity: 0.8; transform: scaleY(1); }
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scaleY(0.85);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scaleY(1);
+  }
 }
 
 /* ── how it works ── */

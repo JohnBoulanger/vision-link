@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import axios from "axios";
 import api from "../../../utils/api";
 import useDebounce from "../../../hooks/useDebounce";
 import Pagination from "../../../components/Pagination";
@@ -77,8 +78,12 @@ export default function BusinessJobs() {
         const res = await api.get("/businesses/me/jobs", { params });
         setJobs(res.data.results);
         setCount(res.data.count);
-      } catch {
-        setError("Failed to load jobs.");
+      } catch (err) {
+        setError(
+          axios.isAxiosError(err)
+            ? err.response?.data?.error || "Failed to load jobs."
+            : "Failed to load jobs."
+        );
       } finally {
         setLoading(false);
       }
@@ -103,9 +108,7 @@ export default function BusinessJobs() {
 
   // toggle a single status in the multi-select filter
   function toggleStatus(s: string) {
-    setStatusFilters((prev) =>
-      prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]
-    );
+    setStatusFilters((prev) => (prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]));
   }
 
   const totalPages = Math.ceil(count / limit);

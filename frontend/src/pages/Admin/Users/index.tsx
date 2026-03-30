@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import axios from "axios";
 import api from "../../../utils/api";
 import useDebounce from "../../../hooks/useDebounce";
 import Pagination from "../../../components/Pagination";
@@ -63,8 +64,12 @@ export default function AdminUsers() {
         const res = await api.get("/users", { params });
         setUsers(res.data.results);
         setCount(res.data.count);
-      } catch {
-        setError("Failed to load users.");
+      } catch (err) {
+        setError(
+          axios.isAxiosError(err)
+            ? err.response?.data?.error || "Failed to load users."
+            : "Failed to load users."
+        );
       } finally {
         setLoading(false);
       }
@@ -81,8 +86,12 @@ export default function AdminUsers() {
       setUsers((prev) =>
         prev.map((u) => (u.id === user.id ? { ...u, suspended: !u.suspended } : u))
       );
-    } catch {
-      setError("Failed to update suspension status.");
+    } catch (err) {
+      setError(
+        axios.isAxiosError(err)
+          ? err.response?.data?.error || "Failed to update suspension status."
+          : "Failed to update suspension status."
+      );
     } finally {
       setPendingId(null);
     }
@@ -95,7 +104,9 @@ export default function AdminUsers() {
       <div className="admin-page-header">
         <div>
           <h1>Users</h1>
-          <p className="admin-subtitle">{count} registered user{count !== 1 ? "s" : ""}</p>
+          <p className="admin-subtitle">
+            {count} registered user{count !== 1 ? "s" : ""}
+          </p>
         </div>
       </div>
 
@@ -109,12 +120,20 @@ export default function AdminUsers() {
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
         />
-        <select aria-label="Filter by activation" value={activatedFilter} onChange={(e) => setActivatedFilter(e.target.value)}>
+        <select
+          aria-label="Filter by activation"
+          value={activatedFilter}
+          onChange={(e) => setActivatedFilter(e.target.value)}
+        >
           <option value="">All activation</option>
           <option value="true">Activated</option>
           <option value="false">Not activated</option>
         </select>
-        <select aria-label="Filter by suspension" value={suspendedFilter} onChange={(e) => setSuspendedFilter(e.target.value)}>
+        <select
+          aria-label="Filter by suspension"
+          value={suspendedFilter}
+          onChange={(e) => setSuspendedFilter(e.target.value)}
+        >
           <option value="">All users</option>
           <option value="false">Active only</option>
           <option value="true">Suspended only</option>
@@ -124,7 +143,13 @@ export default function AdminUsers() {
       {error && (
         <p className="error-message admin-error-dismissible">
           {error}
-          <button className="admin-error-dismiss" onClick={() => setError("")} aria-label="Dismiss error">✕</button>
+          <button
+            className="admin-error-dismiss"
+            onClick={() => setError("")}
+            aria-label="Dismiss error"
+          >
+            ✕
+          </button>
         </p>
       )}
 
@@ -155,12 +180,16 @@ export default function AdminUsers() {
                     <td className="admin-td-email">{user.email}</td>
                     <td>{user.phone_number || "—"}</td>
                     <td>
-                      <span className={`admin-badge ${user.activated ? "badge-green" : "badge-grey"}`}>
+                      <span
+                        className={`admin-badge ${user.activated ? "badge-green" : "badge-grey"}`}
+                      >
                         {user.activated ? "activated" : "pending"}
                       </span>
                     </td>
                     <td>
-                      <span className={`admin-badge ${user.suspended ? "badge-red" : "badge-green"}`}>
+                      <span
+                        className={`admin-badge ${user.suspended ? "badge-red" : "badge-green"}`}
+                      >
                         {user.suspended ? "suspended" : "active"}
                       </span>
                     </td>
@@ -170,11 +199,7 @@ export default function AdminUsers() {
                         disabled={pendingId === user.id}
                         onClick={() => toggleSuspend(user)}
                       >
-                        {pendingId === user.id
-                          ? "…"
-                          : user.suspended
-                          ? "Unsuspend"
-                          : "Suspend"}
+                        {pendingId === user.id ? "…" : user.suspended ? "Unsuspend" : "Suspend"}
                       </button>
                     </td>
                   </tr>

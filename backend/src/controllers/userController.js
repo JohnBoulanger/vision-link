@@ -7,10 +7,10 @@ async function registerUser(req, res) {
     return res.status(201).json(user);
   } catch (error) {
     if (error.type === "validation") {
-      return res.status(400).json({ error: "Bad Request" });
+      return res.status(400).json({ error: "Missing or invalid fields in registration request" });
     }
     if (error.type === "conflict") {
-      return res.status(409).json({ error: "Conflict" });
+      return res.status(409).json({ error: "An account with this email address already exists" });
     }
     return res.status(500).json({ error: "Internal Server Error" });
   }
@@ -24,10 +24,10 @@ async function getUsers(req, res) {
     return res.status(200).json(users);
   } catch (error) {
     if (error.type === "validation") {
-      return res.status(400).json({ error: "Bad Request" });
+      return res.status(400).json({ error: "Invalid query parameters" });
     }
     if (error.type === "forbidden") {
-      return res.status(403).json({ error: "Not Allowed" });
+      return res.status(403).json({ error: "Only administrators can list users" });
     }
     return res.status(500).json({ error: "Internal Server Error" });
   }
@@ -41,10 +41,10 @@ async function getUser(req, res) {
     return res.status(200).json(user);
   } catch (error) {
     if (error.type === "validation") {
-      return res.status(400).json({ error: "Bad Request" });
+      return res.status(400).json({ error: "Invalid query parameters" });
     }
     if (error.type === "not_found") {
-      return res.status(404).json({ error: "Not Found" });
+      return res.status(404).json({ error: "User not found" });
     }
     return res.status(500).json({ error: "Internal Server Error" });
   }
@@ -58,10 +58,12 @@ async function updateUser(req, res) {
     return res.status(200).json(user);
   } catch (error) {
     if (error.type === "validation") {
-      return res.status(400).json({ error: "Bad Request" });
+      return res
+        .status(400)
+        .json({ error: "Invalid update fields — only allowed fields may be updated" });
     }
     if (error.type === "not_found") {
-      return res.status(404).json({ error: "Not Found" });
+      return res.status(404).json({ error: "User not found" });
     }
     return res.status(500).json({ error: "Internal Server Error" });
   }
@@ -75,10 +77,12 @@ async function updateUserAvailability(req, res) {
     return res.status(200).json(user);
   } catch (error) {
     if (error.type === "validation") {
-      return res.status(400).json({ error: "Bad Request" });
+      return res.status(400).json({
+        error: "Cannot set availability: account is suspended or has no approved qualifications",
+      });
     }
     if (error.type === "not_found") {
-      return res.status(404).json({ error: "Not Found" });
+      return res.status(404).json({ error: "User not found" });
     }
     return res.status(500).json({ error: "Internal Server Error" });
   }
@@ -96,13 +100,13 @@ async function updateUserSuspend(req, res) {
     return res.status(200).json(response);
   } catch (error) {
     if (error.type === "validation") {
-      return res.status(400).json({ error: "Bad Request" });
+      return res.status(400).json({ error: "Missing or invalid suspend value" });
     }
     if (error.type === "forbidden") {
-      return res.status(403).json({ error: "Not Allowed" });
+      return res.status(403).json({ error: "Only administrators can suspend users" });
     }
     if (error.type === "not_found") {
-      return res.status(404).json({ error: "Not Found" });
+      return res.status(404).json({ error: "User not found" });
     }
     return res.status(500).json({ error: "Internal Server Error" });
   }
@@ -120,10 +124,10 @@ async function uploadUserAvatar(req, res) {
     return res.status(200).json(response);
   } catch (error) {
     if (error.type === "validation") {
-      return res.status(400).json({ error: "Bad Request" });
+      return res.status(400).json({ error: "Invalid avatar upload" });
     }
     if (error.type === "not_found") {
-      return res.status(404).json({ error: "Not Found" });
+      return res.status(404).json({ error: "User not found" });
     }
     return res.status(500).json({ error: "Internal Server Error" });
   }
@@ -141,10 +145,10 @@ async function uploadUserResume(req, res) {
     return res.status(200).json(response);
   } catch (error) {
     if (error.type === "validation") {
-      return res.status(400).json({ error: "Bad Request" });
+      return res.status(400).json({ error: "Invalid resume upload" });
     }
     if (error.type === "not_found") {
-      return res.status(404).json({ error: "Not Found" });
+      return res.status(404).json({ error: "User not found" });
     }
     return res.status(500).json({ error: "Internal Server Error" });
   }
@@ -158,10 +162,12 @@ async function getInvitations(req, res) {
     return res.status(200).json(invitations);
   } catch (error) {
     if (error.type === "validation") {
-      return res.status(400).json({ error: "Bad Request" });
+      return res.status(400).json({ error: "Invalid query parameters" });
     }
     if (error.type === "forbidden") {
-      return res.status(403).json({ error: "Not Allowed" });
+      return res
+        .status(403)
+        .json({ error: "You do not have permission to view these invitations" });
     }
     return res.status(500).json({ error: "Internal Server Error" });
   }
@@ -175,10 +181,10 @@ async function getInterests(req, res) {
     return res.status(200).json(interests);
   } catch (error) {
     if (error.type === "validation") {
-      return res.status(400).json({ error: "Bad Request" });
+      return res.status(400).json({ error: "Invalid query parameters" });
     }
     if (error.type === "forbidden") {
-      return res.status(403).json({ error: "Not Allowed" });
+      return res.status(403).json({ error: "You do not have permission to view these interests" });
     }
     return res.status(500).json({ error: "Internal Server Error" });
   }

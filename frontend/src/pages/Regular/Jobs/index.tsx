@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import axios from "axios";
 import api from "../../../utils/api";
 import useDebounce from "../../../hooks/useDebounce";
 import Pagination from "../../../components/Pagination";
@@ -64,14 +65,17 @@ export default function Jobs() {
         const res = await api.get("/jobs", { params });
         setJobs(res.data.results);
         setCount(res.data.count);
-      } catch {
-        setError("Failed to load jobs");
+      } catch (err) {
+        setError(
+          axios.isAxiosError(err)
+            ? err.response?.data?.error || "Failed to load jobs"
+            : "Failed to load jobs"
+        );
       } finally {
         setLoading(false);
       }
     }
     fetchJobs();
-     
   }, [page, debouncedPosition, sortField, sortOrder]);
 
   // reset page to 1 when filter/sort changes (separate from fetch to avoid stale page)

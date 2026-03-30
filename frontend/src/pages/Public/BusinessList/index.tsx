@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import axios from "axios";
 import api from "../../../utils/api";
 import useDebounce from "../../../hooks/useDebounce";
 import Pagination from "../../../components/Pagination";
@@ -35,8 +36,12 @@ export default function BusinessList() {
         const response = await api.get("/businesses", { params });
         setBusinesses(response.data.results);
         setCount(response.data.count);
-      } catch {
-        setError("Failed to load businesses");
+      } catch (err) {
+        setError(
+          axios.isAxiosError(err)
+            ? err.response?.data?.error || "Failed to load businesses"
+            : "Failed to load businesses"
+        );
       } finally {
         setLoading(false);
       }

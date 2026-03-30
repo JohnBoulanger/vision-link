@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import axios from "axios";
 import api from "../../../utils/api";
 import LoadingSpinner from "../../../components/LoadingSpinner";
 import "./style.css";
@@ -27,8 +28,12 @@ export default function PublicBusinessProfile() {
       try {
         const response = await api.get(`/businesses/${businessId}`);
         setBusiness(response.data);
-      } catch {
-        setError("Business not found");
+      } catch (err) {
+        setError(
+          axios.isAxiosError(err)
+            ? err.response?.data?.error || "Failed to load business"
+            : "Failed to load business"
+        );
       } finally {
         setLoading(false);
       }

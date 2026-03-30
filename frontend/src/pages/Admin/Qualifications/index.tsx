@@ -93,14 +93,16 @@ export default function AdminQualifications() {
         const res = await api.get("/qualifications", { params });
         const results: QualSummary[] = res.data.results;
         // client-side status filter since backend doesn't expose it on admin list
-        const filtered = statusFilter
-          ? results.filter((q) => q.status === statusFilter)
-          : results;
+        const filtered = statusFilter ? results.filter((q) => q.status === statusFilter) : results;
         setQuals(filtered);
         // when filtering by status, count reflects current page only (backend limitation)
         setCount(statusFilter ? filtered.length : res.data.count);
-      } catch {
-        setError("Failed to load qualifications.");
+      } catch (err) {
+        setError(
+          axios.isAxiosError(err)
+            ? err.response?.data?.error || "Failed to load qualifications."
+            : "Failed to load qualifications."
+        );
       } finally {
         setLoading(false);
       }
@@ -124,8 +126,12 @@ export default function AdminQualifications() {
     try {
       const res = await api.get(`/qualifications/${id}`);
       setDetail(res.data);
-    } catch {
-      setDetailError("Failed to load qualification details.");
+    } catch (err) {
+      setDetailError(
+        axios.isAxiosError(err)
+          ? err.response?.data?.error || "Failed to load qualification details."
+          : "Failed to load qualification details."
+      );
     } finally {
       setDetailLoading(false);
     }
@@ -144,13 +150,13 @@ export default function AdminQualifications() {
         prev.map((q) => (q.id === qualId ? { ...q, status: res.data.status } : q))
       );
       // update expanded detail
-      setDetail((prev) => prev ? { ...prev, status: res.data.status, note: res.data.note } : prev);
+      setDetail((prev) =>
+        prev ? { ...prev, status: res.data.status, note: res.data.note } : prev
+      );
       setActionNote("");
     } catch (err) {
       setDetailError(
-        axios.isAxiosError(err)
-          ? err.response?.data?.error || "Action failed."
-          : "Action failed."
+        axios.isAxiosError(err) ? err.response?.data?.error || "Action failed." : "Action failed."
       );
     } finally {
       setActionPending(false);
@@ -164,7 +170,9 @@ export default function AdminQualifications() {
       <div className="admin-page-header">
         <div>
           <h1>Qualifications</h1>
-          <p className="admin-subtitle">{count} qualification request{count !== 1 ? "s" : ""}</p>
+          <p className="admin-subtitle">
+            {count} qualification request{count !== 1 ? "s" : ""}
+          </p>
         </div>
       </div>
 
@@ -177,7 +185,11 @@ export default function AdminQualifications() {
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
         />
-        <select aria-label="Filter by status" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+        <select
+          aria-label="Filter by status"
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+        >
           <option value="">All statuses</option>
           <option value="created">Created</option>
           <option value="submitted">Submitted</option>
@@ -190,14 +202,21 @@ export default function AdminQualifications() {
       {/* status filter is applied client-side per page — counts won't reflect the full dataset */}
       {statusFilter && (
         <p className="admin-muted qual-filter-note">
-          Status filter applies to the current page only — pagination counts may not reflect total matches across all pages.
+          Status filter applies to the current page only — pagination counts may not reflect total
+          matches across all pages.
         </p>
       )}
 
       {error && (
         <p className="error-message admin-error-dismissible">
           {error}
-          <button className="admin-error-dismiss" onClick={() => setError("")} aria-label="Dismiss error">✕</button>
+          <button
+            className="admin-error-dismiss"
+            onClick={() => setError("")}
+            aria-label="Dismiss error"
+          >
+            ✕
+          </button>
         </p>
       )}
 
@@ -223,9 +242,7 @@ export default function AdminQualifications() {
                   <span className={`admin-badge ${STATUS_CLASS[q.status] ?? "badge-grey"}`}>
                     {q.status}
                   </span>
-                  <span className="qual-date">
-                    {new Date(q.updatedAt).toLocaleDateString()}
-                  </span>
+                  <span className="qual-date">{new Date(q.updatedAt).toLocaleDateString()}</span>
                   <span className="qual-chevron">{expandedId === q.id ? "▲" : "▼"}</span>
                 </button>
 
@@ -241,7 +258,9 @@ export default function AdminQualifications() {
                         <div className="qual-detail-grid">
                           <div>
                             <p className="detail-label">User</p>
-                            <p>{detail.user.first_name} {detail.user.last_name}</p>
+                            <p>
+                              {detail.user.first_name} {detail.user.last_name}
+                            </p>
                             <p className="admin-td-email">{detail.user.email}</p>
                           </div>
                           <div>
@@ -251,7 +270,9 @@ export default function AdminQualifications() {
                           </div>
                           <div>
                             <p className="detail-label">Status</p>
-                            <span className={`admin-badge ${STATUS_CLASS[detail.status] ?? "badge-grey"}`}>
+                            <span
+                              className={`admin-badge ${STATUS_CLASS[detail.status] ?? "badge-grey"}`}
+                            >
                               {detail.status}
                             </span>
                           </div>

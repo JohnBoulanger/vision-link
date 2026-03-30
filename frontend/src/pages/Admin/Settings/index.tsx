@@ -65,7 +65,7 @@ function displayToMs(value: number, unit: "minutes" | "hours"): number {
 }
 
 interface SettingState {
-  value: string;   // display value (string for input)
+  value: string; // display value (string for input)
   saving: boolean;
   saved: boolean;
   error: string;
@@ -117,7 +117,8 @@ export default function AdminSettings() {
 
       {/* no GET endpoints exist for these settings — inputs start blank intentionally */}
       <p className="admin-muted settings-notice">
-        Current values cannot be fetched from the server. Enter the desired new value and press Save to update each setting.
+        Current values cannot be fetched from the server. Enter the desired new value and press Save
+        to update each setting.
       </p>
 
       <div className="settings-grid">
@@ -137,7 +138,9 @@ export default function AdminSettings() {
                   step={cfg.unit === "hours" ? 0.5 : 1}
                   placeholder={`e.g. ${cfg.unit === "hours" ? 24 : 15}`}
                   value={s.value}
-                  onChange={(e) => updateState(cfg.key, { value: e.target.value, error: "", saved: false })}
+                  onChange={(e) =>
+                    updateState(cfg.key, { value: e.target.value, error: "", saved: false })
+                  }
                   className="settings-input"
                 />
                 <span className="settings-unit">{cfg.unit}</span>

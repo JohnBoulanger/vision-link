@@ -22,9 +22,5 @@ export default function ThemeProvider({ children }: { children: React.ReactNode 
     setThemeState(t);
   }
 
-  return (
-    <ThemeContext.Provider value={{ theme, setTheme }}>
-      {children}
-    </ThemeContext.Provider>
-  );
+  return <ThemeContext.Provider value={{ theme, setTheme }}>{children}</ThemeContext.Provider>;
 }

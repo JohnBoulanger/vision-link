@@ -35,8 +35,12 @@ export default function BusinessCandidates() {
         });
         setCandidates(res.data.results);
         setCount(res.data.count);
-      } catch {
-        setError("Failed to load candidates.");
+      } catch (err) {
+        setError(
+          axios.isAxiosError(err)
+            ? err.response?.data?.error || "Failed to load candidates."
+            : "Failed to load candidates."
+        );
       } finally {
         setLoading(false);
       }
@@ -87,8 +91,8 @@ export default function BusinessCandidates() {
         <p className="error-message">{error}</p>
       ) : candidates.length === 0 ? (
         <p className="empty-state">
-          No discoverable candidates right now. Candidates need an approved qualification and must be
-          marked available.
+          No discoverable candidates right now. Candidates need an approved qualification and must
+          be marked available.
         </p>
       ) : (
         <>

@@ -88,8 +88,12 @@ export default function AdminPositionTypes() {
         const res = await api.get("/position-types", { params });
         setPosTypes(res.data.results);
         setCount(res.data.count);
-      } catch {
-        setError("Failed to load position types.");
+      } catch (err) {
+        setError(
+          axios.isAxiosError(err)
+            ? err.response?.data?.error || "Failed to load position types."
+            : "Failed to load position types."
+        );
       } finally {
         setLoading(false);
       }
@@ -122,9 +126,7 @@ export default function AdminPositionTypes() {
         description: editForm.description.trim(),
         hidden: editForm.hidden,
       });
-      setPosTypes((prev) =>
-        prev.map((pt) => (pt.id === id ? { ...pt, ...res.data } : pt))
-      );
+      setPosTypes((prev) => prev.map((pt) => (pt.id === id ? { ...pt, ...res.data } : pt)));
       setEditingId(null);
     } catch (err) {
       setEditError(
@@ -147,9 +149,7 @@ export default function AdminPositionTypes() {
     } catch (err) {
       // 409 = qualified users exist — can't delete
       const msg = axios.isAxiosError(err)
-        ? err.response?.status === 409
-          ? "Cannot delete: users have this qualification."
-          : err.response?.data?.error || "Delete failed."
+        ? err.response?.data?.error || "Delete failed."
         : "Delete failed.";
       setError(msg);
       setConfirmDeleteId(null);
@@ -195,7 +195,9 @@ export default function AdminPositionTypes() {
       <div className="admin-page-header">
         <div>
           <h1>Position Types</h1>
-          <p className="admin-subtitle">{count} type{count !== 1 ? "s" : ""}</p>
+          <p className="admin-subtitle">
+            {count} type{count !== 1 ? "s" : ""}
+          </p>
         </div>
         <button className="btn-primary btn-sm" onClick={() => setShowCreate((v) => !v)}>
           {showCreate ? "Cancel" : "+ New type"}
@@ -243,7 +245,11 @@ export default function AdminPositionTypes() {
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
         />
-        <select aria-label="Filter by visibility" value={hiddenFilter} onChange={(e) => setHiddenFilter(e.target.value)}>
+        <select
+          aria-label="Filter by visibility"
+          value={hiddenFilter}
+          onChange={(e) => setHiddenFilter(e.target.value)}
+        >
           <option value="">All visibility</option>
           <option value="false">Visible</option>
           <option value="true">Hidden</option>
@@ -251,12 +257,19 @@ export default function AdminPositionTypes() {
         <select
           aria-label="Sort field"
           value={sortField}
-          onChange={(e) => { setSortField(e.target.value); setSortOrder("asc"); }}
+          onChange={(e) => {
+            setSortField(e.target.value);
+            setSortOrder("asc");
+          }}
         >
           <option value="name">Sort: name</option>
           <option value="num_qualified">Sort: qualified users</option>
         </select>
-        <select aria-label="Sort order" value={sortOrder} onChange={(e) => setSortOrder(e.target.value)}>
+        <select
+          aria-label="Sort order"
+          value={sortOrder}
+          onChange={(e) => setSortOrder(e.target.value)}
+        >
           <option value="asc">Asc</option>
           <option value="desc">Desc</option>
         </select>
@@ -265,7 +278,13 @@ export default function AdminPositionTypes() {
       {error && (
         <p className="error-message admin-error-dismissible">
           {error}
-          <button className="admin-error-dismiss" onClick={() => setError("")} aria-label="Dismiss error">✕</button>
+          <button
+            className="admin-error-dismiss"
+            onClick={() => setError("")}
+            aria-label="Dismiss error"
+          >
+            ✕
+          </button>
         </p>
       )}
 
@@ -327,10 +346,7 @@ export default function AdminPositionTypes() {
                       <span className="pt-qualified">{pt.num_qualified} qualified</span>
                     </div>
                     <div className="pt-row-actions">
-                      <button
-                        className="btn-secondary btn-sm"
-                        onClick={() => startEdit(pt)}
-                      >
+                      <button className="btn-secondary btn-sm" onClick={() => startEdit(pt)}>
                         Edit
                       </button>
                       {confirmDeleteId === pt.id ? (
@@ -353,7 +369,8 @@ export default function AdminPositionTypes() {
                       ) : pt.num_qualified > 0 ? (
                         // show inline reason instead of title (title is unreliable on disabled buttons)
                         <span className="pt-no-delete-hint">
-                          {pt.num_qualified} user{pt.num_qualified !== 1 ? "s" : ""} qualified — cannot delete
+                          {pt.num_qualified} user{pt.num_qualified !== 1 ? "s" : ""} qualified —
+                          cannot delete
                         </span>
                       ) : (
                         <button

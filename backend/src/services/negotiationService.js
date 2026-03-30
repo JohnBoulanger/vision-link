@@ -313,7 +313,7 @@ class NegotiationService {
       where: { id: negotiation_id },
     });
 
-    return {
+    const result = {
       id: finalNegotiation.id,
       status: finalNegotiation.status,
       createdAt: finalNegotiation.createdAt,
@@ -324,6 +324,19 @@ class NegotiationService {
         business: finalNegotiation.businessDecision,
       },
     };
+
+    // notify both parties in the negotiation room so they see the decision immediately
+    let io;
+    try {
+      io = getIO();
+    } catch (e) {
+      io = null;
+    }
+    if (io) {
+      io.to(`negotiation:${negotiation_id}`).emit("negotiation:updated", result);
+    }
+
+    return result;
   }
 }
 

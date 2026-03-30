@@ -86,9 +86,7 @@ export default function BusinessCandidateDetail() {
       setInvited(value);
     } catch (err) {
       setInviteError(
-        axios.isAxiosError(err)
-          ? err.response?.data?.error || "Action failed."
-          : "Action failed."
+        axios.isAxiosError(err) ? err.response?.data?.error || "Action failed." : "Action failed."
       );
     } finally {
       setInviteLoading(false);
@@ -168,9 +166,7 @@ export default function BusinessCandidateDetail() {
 
         {/* qualification for this job's position type */}
         <div className="bcd-qual">
-          <span className="detail-label">
-            Qualification — {job.position_type.name}
-          </span>
+          <span className="detail-label">Qualification — {job.position_type.name}</span>
           {user.qualification.document ? (
             <a
               href={`${backendUrl}${user.qualification.document}`}
@@ -183,9 +179,7 @@ export default function BusinessCandidateDetail() {
           ) : (
             <span className="bcd-no-doc">No document uploaded</span>
           )}
-          {user.qualification.note && (
-            <p className="bcd-qual-note">{user.qualification.note}</p>
-          )}
+          {user.qualification.note && <p className="bcd-qual-note">{user.qualification.note}</p>}
         </div>
 
         {/* job summary */}

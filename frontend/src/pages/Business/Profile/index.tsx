@@ -33,7 +33,13 @@ export default function BusinessProfile() {
     api
       .get("/businesses/me")
       .then((res) => setProfile(res.data))
-      .catch(() => setError("Failed to load profile."))
+      .catch((err) =>
+        setError(
+          axios.isAxiosError(err)
+            ? err.response?.data?.error || "Failed to load profile."
+            : "Failed to load profile."
+        )
+      )
       .finally(() => setLoading(false));
   }, []);
 

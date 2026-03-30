@@ -32,7 +32,13 @@ export default function BusinessJobCreate() {
     api
       .get("/position-types")
       .then((res) => setPositionTypes(res.data.results ?? res.data))
-      .catch(() => setError("Failed to load position types."))
+      .catch((err) =>
+        setError(
+          axios.isAxiosError(err)
+            ? err.response?.data?.error || "Failed to load position types."
+            : "Failed to load position types."
+        )
+      )
       .finally(() => setPtLoading(false));
   }, []);
 
