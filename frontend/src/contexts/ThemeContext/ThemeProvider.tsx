@@ -12,9 +12,9 @@ function getInitialTheme(): Theme {
 export default function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(getInitialTheme);
 
-  // apply data-theme to <html> whenever theme changes
+  // toggle .dark class on <html> — higher specificity than :root guarantees override
   useEffect(() => {
-    document.documentElement.setAttribute("data-theme", theme);
+    document.documentElement.classList.toggle("dark", theme === "dark");
     localStorage.setItem("theme", theme);
   }, [theme]);
 

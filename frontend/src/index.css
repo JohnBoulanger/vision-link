@@ -46,8 +46,8 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* dark mode — applied via data-theme attribute set by ThemeProvider */
-[data-theme="dark"] {
+/* dark mode — .dark class on <html> has higher specificity than :root */
+html.dark {
     --bg: #14181a;
     --bg-surface: #1c2120;
     --bg-elevated: #222a27;
