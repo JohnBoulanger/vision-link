@@ -1,6 +1,7 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import "./App.css";
 import AuthProvider from "./contexts/AuthContext/AuthProvider";
+import ThemeProvider from "./contexts/ThemeContext/ThemeProvider";
 import NegotiationProvider from "./contexts/NegotiationContext/NegotiationProvider";
 import Layout from "./components/Layout";
 import DashboardLayout from "./components/DashboardLayout";
@@ -49,6 +50,7 @@ import NotFound from "./pages/NotFound";
 
 function App() {
   return (
+    <ThemeProvider>
     <AuthProvider>
       <BrowserRouter>
         {/* negotiation provider needs router context for useNavigate */}
@@ -115,6 +117,7 @@ function App() {
         </NegotiationProvider>
       </BrowserRouter>
     </AuthProvider>
+    </ThemeProvider>
   );
 }
 

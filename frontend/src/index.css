@@ -1,21 +1,24 @@
-/* — global theme inspired by paper.design — */
-/* cool sand with deep navy accent, typographically driven */
+/* — global theme inspired by dentalcorp.com — */
+/* warm white with deep forest green + bright lime accent */
 
 @import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=DM+Mono:wght@400;500&display=swap");
 
 :root {
-  /* palette — cool sand with deep navy accent */
-  --bg: #f2f0eb;
-  --bg-surface: #e8e5df;
-  --bg-elevated: #f8f7f4;
-  --text: #6a6862;
-  --text-strong: #1d1f2b;
-  --text-muted: #928f88;
-  --border: #d6d3cc;
-  --border-light: #e2dfd9;
-  --accent: #2b4c7e;
-  --accent-hover: #1a3356;
-  --accent-subtle: rgba(43, 76, 126, 0.08);
+  /* palette — warm white with deep forest green + lime */
+  --bg: #faf9f6;
+  --bg-surface: #f0efeb;
+  --bg-elevated: #ffffff;
+  --text: #4e5a4c;
+  --text-strong: #1a2118;
+  --text-muted: #8a9487;
+  --border: #d4d8d1;
+  --border-light: #e4e8e1;
+  --accent: #1d4731;
+  --accent-hover: #142f20;
+  --accent-subtle: rgba(29, 71, 49, 0.08);
+  --accent2: #6db33f;
+  --accent2-hover: #599030;
+  --accent2-subtle: rgba(109, 179, 63, 0.1);
   --error: #c1121f;
   --error-bg: rgba(193, 18, 31, 0.06);
   --success: #2d6a4f;
@@ -43,31 +46,32 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* dark mode */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #14151a;
-    --bg-surface: #1c1d24;
-    --bg-elevated: #22232b;
-    --text: #9b99a3;
-    --text-strong: #e4e3ea;
-    --text-muted: #65636e;
-    --border: #2e2f38;
-    --border-light: #25262e;
-    --accent: #5b8ac4;
-    --accent-hover: #7da5d6;
-    --accent-subtle: rgba(91, 138, 196, 0.12);
+/* dark mode — applied via data-theme attribute set by ThemeProvider */
+[data-theme="dark"] {
+    --bg: #14181a;
+    --bg-surface: #1c2120;
+    --bg-elevated: #222a27;
+    --text: #8a9e8c;
+    --text-strong: #dfe8de;
+    --text-muted: #5c6e5d;
+    --border: #2e3a30;
+    --border-light: #263028;
+    --accent: #4a8c63;
+    --accent-hover: #6aaa82;
+    --accent-subtle: rgba(74, 140, 99, 0.12);
+    --accent2: #8dc842;
+    --accent2-hover: #a8e05a;
+    --accent2-subtle: rgba(141, 200, 66, 0.14);
     --error: #e5383b;
     --error-bg: rgba(229, 56, 59, 0.1);
     --success: #52b788;
     --success-bg: rgba(82, 183, 136, 0.1);
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.25);
     --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.35);
-    /* derived surface aliases — dark mode overrides */
-    --bg-base: var(--bg);
-    --bg-hover: var(--bg-surface);
-    --text-body: var(--text);
-  }
+  /* derived surface aliases — dark mode overrides */
+  --bg-base: var(--bg);
+  --bg-hover: var(--bg-surface);
+  --text-body: var(--text);
 }
 
 /* reset */
@@ -198,6 +202,7 @@ button:disabled {
 
 .btn-primary:hover:not(:disabled) {
   background: var(--accent-hover);
+  color: #fff;
 }
 
 /* secondary / outline button */
@@ -268,7 +273,7 @@ button:disabled {
 
 /* job status colour variants */
 .status-open {
-  background: rgba(43, 76, 126, 0.1);
+  background: var(--accent-subtle);
   color: var(--accent);
 }
 .status-filled {

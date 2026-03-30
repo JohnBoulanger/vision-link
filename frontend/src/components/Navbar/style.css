@@ -67,6 +67,76 @@
   position: relative;
 }
 
+/* ── settings gear ── */
+.nav-settings-wrap {
+  position: relative;
+}
+
+.nav-settings-btn {
+  background: none;
+  border: none;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: 4px;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.nav-settings-btn:hover {
+  color: var(--text-strong);
+  background: var(--bg-surface);
+}
+
+.nav-settings-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 120px;
+  box-shadow: var(--shadow-md);
+  z-index: 200;
+  animation: dropdown-in 0.12s ease;
+}
+
+.nav-settings-label {
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  padding: 2px 8px 6px;
+}
+
+.nav-settings-option {
+  background: none;
+  border: none;
+  padding: 7px 10px;
+  border-radius: 5px;
+  font-size: 0.8125rem;
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.1s ease, color 0.1s ease;
+}
+
+.nav-settings-option:hover {
+  background: var(--bg-surface);
+  color: var(--text-strong);
+}
+
+.nav-settings-option.active {
+  background: var(--accent-subtle);
+  color: var(--accent);
+  font-weight: 500;
+}
+
 /* small dropdown that appears below the sign out button */
 .nav-logout-confirm {
   position: absolute;
