@@ -1,16 +1,18 @@
-/* dot grid covers the entire viewport via a fixed pseudo-element */
+/* topography pattern — same as dashboard, static and low opacity */
 .Landing::before {
   content: "";
   position: fixed;
   inset: 0;
-  background-image: radial-gradient(circle, var(--dot-color, #d4d8d1) 1px, transparent 1px);
-  background-size: 28px 28px;
+  background-image: url("/topo-light.svg");
+  background-size: 600px 600px;
   pointer-events: none;
   z-index: 0;
+  opacity: 0.45;
 }
 
 html.dark .Landing::before {
-  --dot-color: #1e2820;
+  background-image: url("/topo-dark.svg");
+  opacity: 0.5;
 }
 
 .Landing {
@@ -21,84 +23,10 @@ html.dark .Landing::before {
   position: relative;
 }
 
-/* ensure all direct children sit above the dot grid */
+/* ensure all direct children sit above the topo layer */
 .Landing > * {
   position: relative;
   z-index: 1;
-}
-
-/* ── decorative floating shapes ── */
-.deco-shapes {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  overflow: hidden;
-}
-
-.deco {
-  position: absolute;
-  animation: decoFloat 12s ease-in-out infinite;
-}
-
-/* position each shape across the viewport */
-.deco-ring {
-  top: 15%;
-  right: 8%;
-  animation-delay: 0s;
-}
-
-.deco-cross {
-  top: 28%;
-  right: 18%;
-  animation-delay: -3s;
-  animation-duration: 10s;
-}
-
-.deco-dots {
-  top: 45%;
-  right: 5%;
-  animation-delay: -6s;
-  animation-duration: 14s;
-}
-
-.deco-diamond {
-  top: 55%;
-  left: 3%;
-  animation-delay: -2s;
-  animation-duration: 11s;
-}
-
-.deco-arc {
-  top: 38%;
-  left: 1%;
-  animation-delay: -7s;
-  animation-duration: 15s;
-}
-
-.deco-triangle {
-  top: 72%;
-  right: 6%;
-  animation-delay: -4s;
-  animation-duration: 13s;
-}
-
-.deco-line-cluster {
-  top: 82%;
-  left: 5%;
-  animation-delay: -9s;
-  animation-duration: 16s;
-}
-
-/* gentle vertical bob for floating shapes */
-@keyframes decoFloat {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-12px);
-  }
 }
 
 /* ── hero ── */
@@ -209,7 +137,7 @@ html.dark .Landing::before {
   }
 }
 
-/* ── how it works ── */
+/* ── getting started ── */
 .how-it-works {
   width: 100%;
   padding: 80px 0;
@@ -269,51 +197,61 @@ html.dark .Landing::before {
   align-self: start;
 }
 
-/* ── feature cards ── */
-.features {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
+/* ── scrolling ticker ── */
+.ticker-section {
   width: 100%;
-  padding: 0 0 60px;
+  padding: 60px 0;
+  border-top: 1px solid var(--border-light);
   animation: landingFadeUp 0.6s ease both;
   animation-delay: 0.35s;
 }
 
-.feature-card {
-  padding: 28px 24px;
-  border: 1px solid var(--border-light);
-  border-radius: 8px;
-  /* fallback for browsers without color-mix support */
-  background: var(--bg-elevated);
-  background: color-mix(in srgb, var(--bg-elevated) 85%, transparent);
-  transition: border-color 0.2s ease;
-}
-
-.feature-card:hover {
-  border-color: var(--accent2);
-}
-
-/* teal accent on feature numbers */
-.feature-num {
-  display: block;
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
+.ticker-label {
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
   color: var(--accent2);
-  letter-spacing: 0.05em;
-  margin-bottom: 12px;
+  margin-bottom: 24px;
 }
 
-.feature-card h2 {
-  font-size: 0.9375rem;
-  font-weight: 500;
-  margin-bottom: 8px;
+/* clip so items slide in/out cleanly */
+.ticker-viewport {
+  overflow: hidden;
+  width: 100%;
 }
 
-.feature-card p {
-  font-size: 0.875rem;
-  color: var(--text);
-  line-height: 1.6;
+/* the track is twice the natural width — first half scrolls off, second fills in */
+.ticker-track {
+  display: flex;
+  width: max-content;
+  animation: tickerScroll 56s linear infinite;
+}
+
+.ticker-item {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  letter-spacing: 0.03em;
+  display: flex;
+  align-items: center;
+}
+
+.ticker-dot {
+  margin: 0 20px;
+  color: var(--accent2);
+  opacity: 0.5;
+  font-size: 1rem;
+}
+
+@keyframes tickerScroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    /* scroll exactly half the track width — seamless because items are duplicated */
+    transform: translateX(-50%);
+  }
 }
 
 /* ── browse cta ── */
@@ -353,7 +291,7 @@ html.dark .Landing::before {
 @media (prefers-reduced-motion: reduce) {
   .hero,
   .how-it-works,
-  .features,
+  .ticker-section,
   .browse-cta {
     animation: none;
   }
@@ -362,7 +300,7 @@ html.dark .Landing::before {
     animation: none;
   }
 
-  .deco {
+  .ticker-track {
     animation: none;
   }
 }
@@ -382,8 +320,8 @@ html.dark .Landing::before {
     display: none;
   }
 
-  .features {
-    grid-template-columns: 1fr;
+  .ticker-track {
+    animation-duration: 36s;
   }
 
   .hero-scroll-cue {

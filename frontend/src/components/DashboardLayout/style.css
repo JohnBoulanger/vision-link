@@ -1,10 +1,35 @@
 /* dashboard shell: sidebar + main content */
 
+/* full-viewport hero patterns topography — static, low opacity */
+.dashboard-shell::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: url("/topo-light.svg");
+  background-size: 600px 600px;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.45;
+}
+
+html.dark .dashboard-shell::before {
+  background-image: url("/topo-dark.svg");
+  opacity: 0.5;
+}
+
 .dashboard-shell {
   display: flex;
   flex: 1;
   gap: 0;
   min-height: calc(100svh - 57px);
+  position: relative;
+}
+
+/* keep sidebar and main above the fixed grid layer */
+.dashboard-sidebar,
+.dashboard-main {
+  position: relative;
+  z-index: 1;
 }
 
 /* left sidebar */
@@ -63,6 +88,12 @@
   flex: 1;
   padding: 32px 32px 64px;
   min-width: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-shell::before {
+    animation: none;
+  }
 }
 
 /* responsive: collapse sidebar to horizontal tabs on mobile */
