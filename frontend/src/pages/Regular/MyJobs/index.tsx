@@ -24,7 +24,7 @@ interface Interest {
   job: JobEntry;
 }
 
-type Tab = "interests" | "invitations";
+type Tab = "interests" | "invitations" | "confirmed";
 
 export default function MyJobs() {
   const navigate = useNavigate();
@@ -41,6 +41,11 @@ export default function MyJobs() {
   const [invitationsCount, setInvitationsCount] = useState(0);
   const [invitationsPage, setInvitationsPage] = useState(1);
 
+  // confirmed/past work state — interests where job is filled/completed/cancelled
+  const [confirmed, setConfirmed] = useState<Interest[]>([]);
+  const [confirmedCount, setConfirmedCount] = useState(0);
+  const [confirmedPage, setConfirmedPage] = useState(1);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [negotiationLoading, setNegotiationLoading] = useState<number | null>(null);
@@ -56,8 +61,19 @@ export default function MyJobs() {
           const res = await api.get("/users/me/interests", {
             params: { page: interestsPage, limit },
           });
-          setInterests(res.data.results);
+          // active interests: jobs still open
+          setInterests(res.data.results.filter((i: Interest) => i.job.status === "open"));
           setInterestsCount(res.data.count);
+        } else if (tab === "confirmed") {
+          const res = await api.get("/users/me/interests", {
+            params: { page: confirmedPage, limit },
+          });
+          // confirmed/past: filled, completed, or cancelled jobs
+          const past = res.data.results.filter((i: Interest) =>
+            ["filled", "completed", "cancelled"].includes(i.job.status)
+          );
+          setConfirmed(past);
+          setConfirmedCount(past.length);
         } else {
           const res = await api.get("/users/me/invitations", {
             params: { page: invitationsPage, limit },
@@ -72,7 +88,7 @@ export default function MyJobs() {
       }
     }
     load();
-  }, [tab, interestsPage, invitationsPage]);
+  }, [tab, interestsPage, invitationsPage, confirmedPage]);
 
   // start negotiation from a mutual interest
   async function handleStartNegotiation(interestId: number) {
@@ -94,6 +110,7 @@ export default function MyJobs() {
 
   const interestsTotalPages = Math.ceil(interestsCount / limit);
   const invitationsTotalPages = Math.ceil(invitationsCount / limit);
+  const confirmedTotalPages = Math.ceil(confirmedCount / limit);
 
   return (
     <div className="MyJobs page-enter">
@@ -121,6 +138,13 @@ export default function MyJobs() {
         >
           Invitations
           {invitationsCount > 0 && <span className="tab-count">{invitationsCount}</span>}
+        </button>
+        <button
+          className={tab === "confirmed" ? "tab active" : "tab"}
+          onClick={() => setTab("confirmed")}
+        >
+          Work history
+          {confirmedCount > 0 && <span className="tab-count">{confirmedCount}</span>}
         </button>
       </div>
 
@@ -186,7 +210,7 @@ export default function MyJobs() {
             onPageChange={setInterestsPage}
           />
         </>
-      ) : (
+      ) : tab === "invitations" ? (
         <>
           {invitations.length === 0 ? (
             <p className="empty-state">No invitations yet</p>
@@ -218,6 +242,38 @@ export default function MyJobs() {
             page={invitationsPage}
             totalPages={invitationsTotalPages}
             onPageChange={setInvitationsPage}
+          />
+        </>
+      ) : (
+        <>
+          {confirmed.length === 0 ? (
+            <p className="empty-state">No past or confirmed work yet.</p>
+          ) : (
+            <div className="myjobs-list">
+              {confirmed.map((item) => (
+                <div key={item.interest_id} className="myjob-row">
+                  <div className="myjob-row-info">
+                    <Link to={`/jobs/${item.job.id}`} className="myjob-title">
+                      {item.job.position_type.name}
+                    </Link>
+                    <span className="myjob-business">{item.job.business.business_name}</span>
+                    <span className="myjob-date">
+                      {new Date(item.job.start_time).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <div className="myjob-row-actions">
+                    <span className={`status-dot status-${item.job.status}`}>
+                      {item.job.status}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          <Pagination
+            page={confirmedPage}
+            totalPages={confirmedTotalPages}
+            onPageChange={setConfirmedPage}
           />
         </>
       )}

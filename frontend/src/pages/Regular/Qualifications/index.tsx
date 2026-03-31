@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import api from "../../../utils/api";
 import { useAuth } from "../../../contexts/AuthContext/AuthContext";
+import Pagination from "../../../components/Pagination";
 import LoadingSpinner from "../../../components/LoadingSpinner";
 import "./style.css";
 
@@ -28,26 +29,16 @@ const ALLOWED_SUBMIT: Record<string, string | null> = {
   revised: null,
 };
 
-// persist qualification ids per user in localStorage
-function loadIds(userId: string): number[] {
-  try {
-    return JSON.parse(localStorage.getItem(`qual_ids_${userId}`) || "[]");
-  } catch {
-    return [];
-  }
-}
-
-function saveIds(userId: string, ids: number[]) {
-  localStorage.setItem(`qual_ids_${userId}`, JSON.stringify(ids));
-}
-
 export default function Qualifications() {
   const { user } = useAuth();
   const userId = String((user as Record<string, unknown>)?.id ?? "");
 
   const [quals, setQuals] = useState<Qualification[]>([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [positionTypes, setPositionTypes] = useState<PositionType[]>([]);
+  const limit = 10;
 
   // create form state
   const [showCreate, setShowCreate] = useState(false);
@@ -61,35 +52,19 @@ export default function Qualifications() {
   const [actionError, setActionError] = useState<Record<number, string>>({});
   const fileRefs = useRef<Record<number, HTMLInputElement | null>>({});
 
-  // load qualifications from localStorage cache, then refresh from API
+  // load qualifications from server
   useEffect(() => {
     if (!userId) return;
-
-    async function load() {
-      setLoading(true);
-      const ids = loadIds(userId);
-      if (ids.length === 0) {
-        setLoading(false);
-        return;
-      }
-      const results = await Promise.all(
-        ids.map((id) =>
-          api
-            .get(`/qualifications/${id}`)
-            .then((r) => r.data as Qualification)
-            .catch(() => null)
-        )
-      );
-      // filter out any that returned null (deleted/not found)
-      const valid = results.filter(Boolean) as Qualification[];
-      const validIds = valid.map((q) => q.id);
-      saveIds(userId, validIds);
-      setQuals(valid);
-      setLoading(false);
-    }
-
-    load();
-  }, [userId]);
+    setLoading(true);
+    api
+      .get("/qualifications/me", { params: { page, limit } })
+      .then((res) => {
+        setQuals(res.data.results);
+        setTotalPages(Math.ceil(res.data.count / limit));
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [userId, page]);
 
   // load position types for the create form
   useEffect(() => {
@@ -105,14 +80,15 @@ export default function Qualifications() {
     setCreateError("");
     setCreateLoading(true);
     try {
-      const res = await api.post("/qualifications", {
+      await api.post("/qualifications", {
         position_type_id: parseInt(newPositionId),
         note: newNote,
       });
-      const newQual = res.data as Qualification;
-      const ids = loadIds(userId);
-      saveIds(userId, [...ids, newQual.id]);
-      setQuals((prev) => [...prev, newQual]);
+      // reload from server to get fresh list with the new entry
+      const res = await api.get("/qualifications/me", { params: { page: 1, limit } });
+      setQuals(res.data.results);
+      setTotalPages(Math.ceil(res.data.count / limit));
+      setPage(1);
       setShowCreate(false);
       setNewPositionId("");
       setNewNote("");
@@ -294,6 +270,7 @@ export default function Qualifications() {
           })}
         </div>
       )}
+      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
     </div>
   );
 }

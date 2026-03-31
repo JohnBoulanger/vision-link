@@ -20,7 +20,7 @@ interface Job {
   salary_max: number;
   start_time: string;
   end_time: string;
-  worker: { id: number } | null;
+  worker: { id: number; first_name?: string; last_name?: string } | null;
 }
 
 // all possible job statuses
@@ -56,7 +56,13 @@ export default function BusinessJobs() {
     api
       .get("/position-types")
       .then((res) => setPositionTypes(res.data.results ?? res.data))
-      .catch(() => {});
+      .catch((err) =>
+        setError(
+          axios.isAxiosError(err)
+            ? err.response?.data?.error || "Failed to load jobs."
+            : "Failed to load jobs."
+        )
+      );
   }, []);
 
   // fetch business's jobs
@@ -193,6 +199,11 @@ export default function BusinessJobs() {
                   </span>
                 </div>
                 <div className="bjob-row-right">
+                  {job.worker && (
+                    <span className="bjob-worker">
+                      {job.worker.first_name} {job.worker.last_name}
+                    </span>
+                  )}
                   <span className="bjob-salary">
                     ${job.salary_min}–${job.salary_max}/hr
                   </span>

@@ -68,8 +68,37 @@ class QualificationService {
     };
   }
 
+  // list qualifications for the authenticated regular user
+  static async getUserQualifications(data, userId) {
+    const page = parseInt(data.page) || 1;
+    const limit = parseInt(data.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const where = { userId };
+
+    const count = await prisma.qualification.count({ where });
+    const qualifications = await prisma.qualification.findMany({
+      where,
+      take: limit,
+      skip,
+      orderBy: { updatedAt: "desc" },
+      include: { position: true },
+    });
+
+    const results = qualifications.map((q) => ({
+      id: q.id,
+      status: q.status,
+      note: q.note,
+      document: q.document,
+      position_type: { id: q.position.id, name: q.position.name },
+      updatedAt: q.updatedAt,
+    }));
+
+    return { count, results };
+  }
+
   static async getQualifications(data, requesterRole) {
-    const { keyword } = data;
+    const { keyword, status } = data;
     const page = parseInt(data.page) || 1;
     const limit = parseInt(data.limit) || 10;
     const skip = (page - 1) * limit;
@@ -80,6 +109,11 @@ class QualificationService {
     }
 
     const where = {};
+
+    // filter by status when provided
+    if (status) {
+      where.status = status;
+    }
 
     // construct where clause for qualifications
     // check if keyword is contained within the following fields

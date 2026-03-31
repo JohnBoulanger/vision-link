@@ -64,8 +64,13 @@ export default function PublicBusinessProfile() {
       </Link>
 
       <div className="profile-header">
-        {avatarUrl && (
+        {/* avatar or initials placeholder */}
+        {avatarUrl ? (
           <img src={avatarUrl} alt={business.business_name} className="profile-avatar" />
+        ) : (
+          <div className="profile-avatar-placeholder" aria-hidden="true">
+            {business.business_name.charAt(0).toUpperCase()}
+          </div>
         )}
         <div>
           <h1>{business.business_name}</h1>
@@ -85,9 +90,15 @@ export default function PublicBusinessProfile() {
         {business.location && (
           <div className="detail-row">
             <span className="detail-label">Location</span>
-            <span>
-              {business.location.lat}, {business.location.lon}
-            </span>
+            {/* link to google maps instead of showing raw coordinates */}
+            <a
+              href={`https://www.google.com/maps?q=${business.location.lat},${business.location.lon}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="map-link"
+            >
+              View on map ↗
+            </a>
           </div>
         )}
       </div>

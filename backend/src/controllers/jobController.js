@@ -15,7 +15,7 @@ async function getJobs(req, res) {
     if (error.type === "forbidden") {
       return res
         .status(403)
-        .json({ error: "Businesses cannot provide location parameters when listing jobs" });
+        .json({ error: "Businesses cannot provide location parameters" });
     }
     return res.status(500).json({ error: "Internal Server Error" });
   }
@@ -100,7 +100,7 @@ async function setInterest(req, res) {
     }
     if (error.type === "conflict") {
       return res.status(409).json({
-        error: "This job is no longer available or you are currently in a negotiation for it",
+        error: "You are currently in a negotiation for this job",
       });
     }
     return res.status(500).json({ error: "Internal Server Error" });
@@ -223,7 +223,7 @@ async function getInterests(req, res) {
       return res.status(404).json({ error: "Job not found" });
     }
     if (error.type === "conflict") {
-      return res.status(409).json({ error: "This job is no longer available for viewing interests" });
+      return res.status(409).json({ error: "This job is no longer available for expressing interest" });
     }
     return res.status(500).json({ error: "Internal Server Error" });
   }

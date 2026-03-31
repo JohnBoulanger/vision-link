@@ -65,6 +65,9 @@ export default function Navbar() {
             <Link to="/my-jobs" className={isActive("/my-jobs") ? "active" : ""}>
               My jobs
             </Link>
+            <Link to="/position-types" className={isActive("/position-types") ? "active" : ""}>
+              Positions
+            </Link>
             <Link to="/qualifications" className={isActive("/qualifications") ? "active" : ""}>
               Qualifications
             </Link>

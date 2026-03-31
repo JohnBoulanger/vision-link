@@ -2,6 +2,7 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 const { isValidEmail, isValidPassword, parseBoolean } = require("../helpers/validation");
 const encodePassword = require("../helpers/encodePassword");
+const system = require("../config/system");
 
 class UserService {
   static async registerUser(data) {
@@ -113,7 +114,7 @@ class UserService {
     if (user.available && user.lastActiveAt) {
       const lastActive = new Date(user.lastActiveAt).getTime();
       const elapsedSeconds = (now - lastActive) / 1000;
-      active = elapsedSeconds <= system.availabilityTimeout;
+      available = elapsedSeconds <= system.availabilityTimeout;
     }
     return {
       id: user.accountId,
@@ -374,7 +375,7 @@ class UserService {
       where: {
         userId: userId,
         businessInterested: true,
-        userInterested: { not: true },
+        userInterested: null,
       },
       include: {
         job: {
@@ -393,7 +394,7 @@ class UserService {
       where: {
         userId: userId,
         businessInterested: true,
-        userInterested: { not: true },
+        userInterested: null,
       },
     });
 

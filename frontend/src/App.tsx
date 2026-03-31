@@ -25,6 +25,7 @@ import Jobs from "./pages/Regular/Jobs";
 import JobDetail from "./pages/Regular/JobDetail";
 import MyJobs from "./pages/Regular/MyJobs";
 import Qualifications from "./pages/Regular/Qualifications";
+import RegularPositionTypes from "./pages/Regular/PositionTypes";
 import UserProfile from "./pages/Regular/Profile";
 import Negotiation from "./pages/Regular/Negotiation";
 
@@ -80,6 +81,7 @@ function App() {
                   <Route path="/jobs/:jobId" element={<JobDetail />} />
                   <Route path="/my-jobs" element={<MyJobs />} />
                   <Route path="/qualifications" element={<Qualifications />} />
+                  <Route path="/position-types" element={<RegularPositionTypes />} />
                   <Route path="/profile" element={<UserProfile />} />
                   <Route path="/negotiations/me" element={<Negotiation />} />
                 </Route>

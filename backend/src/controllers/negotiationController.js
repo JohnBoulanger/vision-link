@@ -12,7 +12,7 @@ async function createNegotiation(req, res) {
     if (error.type === "forbidden") {
       return res
         .status(403)
-        .json({ error: "Both parties must express mutual interest before starting a negotiation" });
+        .json({ error: "Both parties must express interest before a negotiation can be started" });
     }
     if (error.type === "not_found") {
       return res
@@ -22,7 +22,7 @@ async function createNegotiation(req, res) {
     if (error.type === "conflict") {
       return res.status(409).json({
         error:
-          "One or both parties are already in an active negotiation, or this job is no longer negotiable",
+          "One or both parties are already in an active negotiation",
       });
     }
     return res.status(500).json({ error: "Internal Server Error" });
@@ -60,7 +60,7 @@ async function setDecision(req, res) {
     if (error.type === "conflict") {
       return res.status(409).json({
         error:
-          "Negotiation ID does not match your active negotiation, or the negotiation is no longer active",
+          "Negotiation ID does not match your current active negotiation",
       });
     }
     return res.status(500).json({ error: "Internal Server Error" });

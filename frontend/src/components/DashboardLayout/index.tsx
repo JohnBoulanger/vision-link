@@ -8,6 +8,7 @@ import "./style.css";
 const regularLinks = [
   { to: "/jobs", label: "Browse jobs" },
   { to: "/my-jobs", label: "My jobs" },
+  { to: "/position-types", label: "Positions" },
   { to: "/qualifications", label: "Qualifications" },
   { to: "/negotiations/me", label: "Negotiation" },
   { to: "/profile", label: "Profile" },

@@ -154,5 +154,16 @@ module.exports = {
   getQualification,
   updateQualification,
   getQualifications,
+  getUserQualifications,
   uploadQualificationDocument,
 };
+
+async function getUserQualifications(req, res) {
+  try {
+    const userId = req.user.id;
+    const response = await QualificationService.getUserQualifications(req.query, userId);
+    return res.status(200).json(response);
+  } catch (error) {
+    return res.status(500).json({ error: "Failed to retrieve qualifications" });
+  }
+}

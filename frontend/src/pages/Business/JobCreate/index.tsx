@@ -15,6 +15,7 @@ export default function BusinessJobCreate() {
   const navigate = useNavigate();
   const [positionTypes, setPositionTypes] = useState<PositionType[]>([]);
   const [ptLoading, setPtLoading] = useState(true);
+  const [verified, setVerified] = useState<boolean | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -26,6 +27,22 @@ export default function BusinessJobCreate() {
     end_time: "",
     note: "",
   });
+
+  // check business verification status before allowing job creation
+  useEffect(() => {
+    api
+      .get("/businesses/me")
+      .then((res) => setVerified(res.data.verified))
+      .catch((err) => {
+        // fall back to treating the business as unverified on any load error
+        setVerified(false);
+        setError(
+          axios.isAxiosError(err)
+            ? err.response?.data?.error || "Failed to load profile."
+            : "Failed to load profile."
+        );
+      });
+  }, []);
 
   // load position types for the dropdown
   useEffect(() => {
@@ -102,7 +119,26 @@ export default function BusinessJobCreate() {
     }
   }
 
-  if (ptLoading) return <LoadingSpinner />;
+  // block unverified businesses from posting jobs
+  if (verified === false)
+    return (
+      <div className="BusinessJobCreate page-enter">
+        <div className="jcreate-header">
+          <h1>Post a Job</h1>
+          <Link to="/business/jobs" className="back-link">
+            ← My jobs
+          </Link>
+        </div>
+        <div className="jcreate-unverified">
+          <p>Your business must be verified by an admin before you can post jobs.</p>
+          <Link to="/business/profile" className="btn-secondary">
+            Go to profile →
+          </Link>
+        </div>
+      </div>
+    );
+
+  if (ptLoading || verified === null) return <LoadingSpinner />;
 
   return (
     <div className="BusinessJobCreate page-enter">

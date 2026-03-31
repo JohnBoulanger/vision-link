@@ -1,5 +1,5 @@
 const { PrismaClient } = require("@prisma/client");
-const { negotiationWindow } = require("../config/system");
+const system = require("../config/system");
 const { getIO } = require("../socket");
 const prisma = new PrismaClient();
 
@@ -9,6 +9,12 @@ class NegotiationService {
     if (isNaN(interest_id)) {
       throw { type: "validation" };
     }
+
+    // expire any active negotiations whose window has passed (lazy cleanup on non-GET)
+    await prisma.negotiation.updateMany({
+      where: { status: "active", expiresAt: { lt: new Date() } },
+      data: { status: "failed" },
+    });
 
     // check if we have an existing negotiation under this id
     const existingNegotiation = await prisma.negotiation.findFirst({
@@ -75,6 +81,18 @@ class NegotiationService {
       throw { type: "forbidden" };
     }
 
+    // verify candidate meets all discoverability conditions: not suspended, available, recently active
+    const activityCutoff = new Date(now.getTime() - system.availabilityTimeout * 1000);
+    const candidate = interest.user;
+    const isDiscoverable =
+      !candidate.suspended &&
+      candidate.available &&
+      candidate.lastActiveAt &&
+      new Date(candidate.lastActiveAt) >= activityCutoff;
+    if (!isDiscoverable) {
+      throw { type: "forbidden", message: "The candidate is not currently discoverable" };
+    }
+
     // handle party is in active negotiation or job in state where negotiation cant be started
     const userActive = interest.user.negotiations.some((n) => n.status === "active");
     const businessActive = interest.job.business.negotiations.some((n) => n.status === "active");
@@ -86,7 +104,7 @@ class NegotiationService {
     }
 
     // calculate negotiation expiry window
-    const expiresAt = new Date(now.getTime() + negotiationWindow);
+    const expiresAt = new Date(now.getTime() + system.negotiationWindow);
 
     // create negotiation
     const negotiation = await prisma.negotiation.create({
@@ -224,6 +242,12 @@ class NegotiationService {
     if (isNaN(negotiation_id) || !["accept", "decline"].includes(decision)) {
       throw { type: "validation" };
     }
+
+    // expire any active negotiations whose window has passed (lazy cleanup on non-GET)
+    await prisma.negotiation.updateMany({
+      where: { status: "active", expiresAt: { lt: new Date() } },
+      data: { status: "failed" },
+    });
 
     // find the negotiation
     const negotiation = await prisma.negotiation.findUnique({

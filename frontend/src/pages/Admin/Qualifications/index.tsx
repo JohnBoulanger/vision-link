@@ -72,8 +72,6 @@ export default function AdminQualifications() {
   const prevFiltersRef = useRef({ debouncedKeyword, statusFilter });
 
   // fetch qualifications — resets to page 1 when filters change to avoid stale-page fetches
-  // note: status filter is client-side only because the backend list endpoint doesn't expose it,
-  // so the page count shown when filtering reflects only the current page's matches, not the full dataset
   useEffect(() => {
     let activePage = page;
     const prev = prevFiltersRef.current;
@@ -89,14 +87,11 @@ export default function AdminQualifications() {
       try {
         const params: Record<string, unknown> = { page: activePage, limit };
         if (debouncedKeyword) params.keyword = debouncedKeyword;
-        // backend doesn't expose status filter on list — filter client-side
+        // pass status to backend for accurate server-side filtering and pagination
+        if (statusFilter) params.status = statusFilter;
         const res = await api.get("/qualifications", { params });
-        const results: QualSummary[] = res.data.results;
-        // client-side status filter since backend doesn't expose it on admin list
-        const filtered = statusFilter ? results.filter((q) => q.status === statusFilter) : results;
-        setQuals(filtered);
-        // when filtering by status, count reflects current page only (backend limitation)
-        setCount(statusFilter ? filtered.length : res.data.count);
+        setQuals(res.data.results);
+        setCount(res.data.count);
       } catch (err) {
         setError(
           axios.isAxiosError(err)
@@ -198,14 +193,6 @@ export default function AdminQualifications() {
           <option value="revised">Revised</option>
         </select>
       </div>
-
-      {/* status filter is applied client-side per page — counts won't reflect the full dataset */}
-      {statusFilter && (
-        <p className="admin-muted qual-filter-note">
-          Status filter applies to the current page only — pagination counts may not reflect total
-          matches across all pages.
-        </p>
-      )}
 
       {error && (
         <p className="error-message admin-error-dismissible">

@@ -19,8 +19,15 @@ interface UserProfile {
   suspended: boolean;
 }
 
+interface ApprovedQual {
+  id: number;
+  position_type: { id: number; name: string };
+  updatedAt: string;
+}
+
 export default function UserProfile() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [approvedQuals, setApprovedQuals] = useState<ApprovedQual[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
@@ -44,14 +51,16 @@ export default function UserProfile() {
   const resumeRef = useRef<HTMLInputElement | null>(null);
   const backendUrl = import.meta.env.VITE_BACKEND_URL || "";
 
-  // load profile on mount
+  // load profile and approved qualifications on mount
   useEffect(() => {
-    api
-      .get("/users/me")
-      .then((res) => {
-        const p = res.data as UserProfile;
+    async function load() {
+      try {
+        const [profileRes, qualsRes] = await Promise.all([
+          api.get("/users/me"),
+          api.get("/qualifications/me", { params: { limit: 50 } }),
+        ]);
+        const p = profileRes.data as UserProfile;
         setProfile(p);
-        // initialise form with current values
         setForm({
           first_name: p.first_name ?? "",
           last_name: p.last_name ?? "",
@@ -60,9 +69,19 @@ export default function UserProfile() {
           birthday: p.birthday ? p.birthday.slice(0, 10) : "",
           biography: p.biography ?? "",
         });
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
+        // only show approved qualifications on the profile
+        setApprovedQuals(
+          (qualsRes.data.results as ApprovedQual[]).filter(
+            (q: ApprovedQual & { status: string }) => q.status === "approved"
+          )
+        );
+      } catch {
+        // profile load failure handled by the null check below
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
   }, []);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
@@ -232,6 +251,22 @@ export default function UserProfile() {
                 : "Upload PDF"}
           </button>
         </div>
+      </div>
+
+      {/* approved qualifications */}
+      <div className="profile-quals">
+        <span className="detail-label">Approved qualifications</span>
+        {approvedQuals.length === 0 ? (
+          <p className="profile-quals-empty">None yet — submit a qualification request to get started.</p>
+        ) : (
+          <div className="profile-quals-list">
+            {approvedQuals.map((q) => (
+              <span key={q.id} className="profile-qual-badge">
+                {q.position_type.name}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* editable fields form */}

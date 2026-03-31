@@ -1,6 +1,7 @@
 const { PrismaClient } = require("@prisma/client");
 const haversineDistance = require("../helpers/haversineDistance");
 const { parseBoolean } = require("../helpers/validation");
+const system = require("../config/system");
 const prisma = new PrismaClient();
 
 class JobService {
@@ -217,6 +218,12 @@ class JobService {
   static async setNoShow(jobId, businessId, requesterRole) {
     const now = new Date();
 
+    // expire any open jobs that have passed their end time (lazy cleanup on non-GET)
+    await prisma.job.updateMany({
+      where: { status: "open", end_time: { lt: now } },
+      data: { status: "expired" },
+    });
+
     // must be a business
     if (requesterRole === "regular") {
       throw { type: "forbidden" };
@@ -369,9 +376,15 @@ class JobService {
     if (!job || job.businessId !== businessId) {
       throw { type: "not_found" };
     }
-    // find the qualified users for the job
+    // compute the cutoff for lastActiveAt based on system availability timeout (in seconds)
+    const activityCutoff = new Date(Date.now() - system.availabilityTimeout * 1000);
+
+    // find the qualified users for the job — must also be not suspended, available, and recently active
     const qualifiedUsers = await prisma.regularUser.findMany({
       where: {
+        suspended: false,
+        available: true,
+        lastActiveAt: { gte: activityCutoff },
         qualifications: {
           some: {
             positionTypeId: job.positionTypeId,
@@ -516,6 +529,13 @@ class JobService {
 
   static async updateInterestInCandidate(data, jobId, userId, businessId, requesterRole) {
     const interested = parseBoolean(data.interested);
+    const now = new Date();
+
+    // expire any open jobs that have passed their end time (lazy cleanup on non-GET)
+    await prisma.job.updateMany({
+      where: { status: "open", end_time: { lt: now } },
+      data: { status: "expired" },
+    });
 
     // must be a business
     if (requesterRole === "regular") {
@@ -591,7 +611,7 @@ class JobService {
           jobId: jobId,
           userId: userId,
           businessInterested: true,
-          userInterested: false,
+          userInterested: null,
         },
       });
     }

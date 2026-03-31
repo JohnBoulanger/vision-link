@@ -15,6 +15,23 @@
   gap: 18px;
 }
 
+/* gate shown when business is not yet verified */
+.jcreate-unverified {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text-body);
+}
+
+.jcreate-unverified p {
+  margin: 0;
+  color: var(--text-muted);
+}
+
 .jcreate-actions {
   display: flex;
   align-items: center;

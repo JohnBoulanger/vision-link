@@ -21,6 +21,8 @@ export default function BusinessList() {
   const [page, setPage] = useState(1);
   const [searchInput, setSearchInput] = useState("");
   const keyword = useDebounce(searchInput, 300);
+  const [sortField, setSortField] = useState("business_name");
+  const [sortOrder, setSortOrder] = useState("asc");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   // 9 per page keeps the 3-column grid full (3×3)
@@ -32,7 +34,12 @@ export default function BusinessList() {
       setLoading(true);
       setError("");
       try {
-        const params: Record<string, string | number> = { page, limit };
+        const params: Record<string, string | number> = {
+          page,
+          limit,
+          sort: sortField,
+          order: sortOrder,
+        };
         if (keyword) params.keyword = keyword;
         const response = await api.get("/businesses", { params });
         setBusinesses(response.data.results);
@@ -48,12 +55,12 @@ export default function BusinessList() {
       }
     }
     fetchBusinesses();
-  }, [page, keyword]);
+  }, [page, keyword, sortField, sortOrder]);
 
-  // reset to page 1 when debounced keyword changes
+  // reset to page 1 when filters change
   useEffect(() => {
     setPage(1);
-  }, [keyword]);
+  }, [keyword, sortField, sortOrder]);
 
   function handleKeywordChange(e: React.ChangeEvent<HTMLInputElement>) {
     setSearchInput(e.target.value);
@@ -65,7 +72,7 @@ export default function BusinessList() {
     <div className="BusinessList page-enter">
       <h1>Dental clinics</h1>
 
-      {/* search controls */}
+      {/* search + sort controls */}
       <div className="list-controls">
         <input
           type="text"
@@ -74,6 +81,14 @@ export default function BusinessList() {
           onChange={handleKeywordChange}
           className="search-input"
         />
+        <select value={sortField} onChange={(e) => setSortField(e.target.value)}>
+          <option value="business_name">Name</option>
+          <option value="createdAt">Newest</option>
+        </select>
+        <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value)}>
+          <option value="asc">A → Z</option>
+          <option value="desc">Z → A</option>
+        </select>
       </div>
 
       {loading ? (

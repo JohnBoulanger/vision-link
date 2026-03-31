@@ -43,7 +43,13 @@ export default function Jobs() {
     api
       .get("/position-types")
       .then((res) => setPositionTypes(res.data.results ?? res.data))
-      .catch(() => {});
+      .catch((err) =>
+        setError(
+          axios.isAxiosError(err)
+            ? err.response?.data?.error || "Failed to load jobs"
+            : "Failed to load jobs"
+        )
+      );
   }, []);
 
   // fetch jobs — reset to page 1 when filters change, otherwise use current page

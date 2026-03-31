@@ -6,9 +6,19 @@ const {
   getQualification,
   updateQualification,
   uploadQualificationDocument,
+  getUserQualifications,
 } = require("../controllers/qualificationController");
 const { jwtAuth } = require("../middleware/auth");
 const { uploadDocument } = require("../middleware/upload");
+
+// list the authenticated regular user's own qualifications
+// must come before /:qualificationId to avoid "me" being treated as an id
+router
+  .route("/me")
+  .get(jwtAuth, getUserQualifications)
+  .all((req, res) => {
+    res.status(405).json({ error: "Method Not Allowed" });
+  });
 
 // upload or replace document for authenticated user
 router

@@ -31,6 +31,32 @@
   border: 1px solid var(--border);
 }
 
+/* initials placeholder shown when no avatar is uploaded */
+.profile-avatar-placeholder {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--accent-subtle);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.map-link {
+  color: var(--accent);
+  font-size: 0.9375rem;
+  text-decoration: none;
+}
+
+.map-link:hover {
+  text-decoration: underline;
+}
+
 .profile-header h1 {
   margin: 0;
   font-size: 1.75rem;

@@ -1,0 +1,74 @@
+.RegularPositionTypes {
+  max-width: 720px;
+}
+
+.pt-header {
+  margin-bottom: 28px;
+}
+
+.pt-subtitle {
+  font-size: 0.9375rem;
+  color: var(--text-muted);
+  margin-top: 6px;
+  line-height: 1.6;
+}
+
+.pt-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pt-card {
+  padding: 20px 24px;
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  background: var(--bg-elevated);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.pt-card-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.pt-card-body h2 {
+  font-size: 1rem;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.pt-description {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  line-height: 1.55;
+}
+
+.pt-card-actions {
+  flex-shrink: 0;
+}
+
+.pt-create-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 240px;
+}
+
+.pt-note-input {
+  resize: vertical;
+  font-size: 0.875rem;
+}
+
+.pt-create-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.pt-success {
+  font-size: 0.875rem;
+  color: var(--success);
+}
