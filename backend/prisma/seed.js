@@ -8,7 +8,7 @@ const { PrismaClient } = require('@prisma/client');
 const encodePassword = require('../src/helpers/encodePassword');
 const prisma = new PrismaClient();
 
-const PASSWORD = 'Password123!';
+const PASSWORD = '123123';
 
 // Toronto-area dental clinic names and coordinates
 const BUSINESS_DATA = [
