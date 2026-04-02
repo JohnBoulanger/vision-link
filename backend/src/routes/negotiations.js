@@ -1,5 +1,7 @@
 const express = require("express");
 const { jwtAuth } = require("../middleware/auth");
+const { validate } = require("../middleware/validate");
+const { createNegotiationSchema, decisionSchema } = require("../validators/negotiationSchemas");
 
 const {
   createNegotiation,
@@ -12,7 +14,7 @@ const router = express.Router();
 // start a negotiation for a job
 router
   .route("/")
-  .post(jwtAuth, createNegotiation)
+  .post(jwtAuth, validate(createNegotiationSchema), createNegotiation)
   .all((req, res) => {
     res.status(405).json({ error: "Method Not Allowed" });
   });
@@ -28,7 +30,7 @@ router
 // set the authenticated party's decision for an active negotiation
 router
   .route("/me/decision")
-  .patch(jwtAuth, setDecision)
+  .patch(jwtAuth, validate(decisionSchema), setDecision)
   .all((req, res) => {
     res.status(405).json({ error: "Method Not Allowed" });
   });

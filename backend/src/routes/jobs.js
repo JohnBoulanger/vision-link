@@ -10,6 +10,8 @@ const {
   getInterests,
 } = require("../controllers/jobController");
 const { jwtAuth } = require("../middleware/auth");
+const { validate } = require("../middleware/validate");
+const { interestBodySchema } = require("../validators/querySchemas");
 
 const router = express.Router();
 
@@ -32,7 +34,7 @@ router
 // invite (or withdraw an invitation for) a regular user to express interest in this job posting.
 router
   .route("/:jobId/candidates/:userId/interested")
-  .patch(jwtAuth, updateInterestInCandidate)
+  .patch(jwtAuth, validate(interestBodySchema), updateInterestInCandidate)
   .all((req, res) => {
     res.status(405).json({ error: "Method Not Allowed" });
   });
@@ -48,7 +50,7 @@ router
 // express interest in a job posting
 router
   .route("/:jobId/interested")
-  .patch(jwtAuth, setInterest)
+  .patch(jwtAuth, validate(interestBodySchema), setInterest)
   .all((req, res) => {
     res.status(405).json({ error: "Method Not Allowed" });
   });

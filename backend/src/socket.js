@@ -2,15 +2,15 @@
 
 const { Server } = require("socket.io");
 const jwt = require("jsonwebtoken");
-require("dotenv").config();
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
+const config = require("./config/env");
 
-const SECRET_KEY = process.env.JWT_SECRET || "test_secret";
+const SECRET_KEY = config.jwtSecret;
 
 let io;
 function attach_sockets(server) {
-  io = new Server(server, { cors: { origin: "*" } });
+  io = new Server(server, { cors: { origin: config.frontendUrl } });
 
   io.on("connection", (socket) => {
     // get the jwt token provided by the client
@@ -51,6 +51,10 @@ function attach_sockets(server) {
         // non-fatal — socket still works, just won't receive room messages
       });
 
+    // per-socket message rate limiting — 30 messages per minute
+    const socketRateLimit = { count: 0, resetAt: Date.now() + 60000 };
+    const SOCKET_MAX_MESSAGES = 30;
+
     // handle incoming negotiation message from client
     socket.on("negotiation:message", async (data) => {
       // check authentication
@@ -61,8 +65,40 @@ function attach_sockets(server) {
         });
         return;
       }
+
+      // check socket rate limit
+      const now = Date.now();
+      if (now > socketRateLimit.resetAt) {
+        socketRateLimit.count = 0;
+        socketRateLimit.resetAt = now + 60000;
+      }
+      socketRateLimit.count++;
+      if (socketRateLimit.count > SOCKET_MAX_MESSAGES) {
+        socket.emit("negotiation:error", {
+          error: "Rate limit exceeded",
+          message: "Too many messages. Please wait before sending more.",
+        });
+        return;
+      }
+
       const negotiationId = data.negotiation_id;
       const text = data.text;
+
+      // validate message input
+      if (!text || typeof text !== "string" || text.length === 0 || text.length > 2000) {
+        socket.emit("negotiation:error", {
+          error: "Invalid message",
+          message: "Message text must be between 1 and 2000 characters",
+        });
+        return;
+      }
+      if (!negotiationId || typeof negotiationId !== "number") {
+        socket.emit("negotiation:error", {
+          error: "Invalid message",
+          message: "A valid negotiation_id is required",
+        });
+        return;
+      }
       // get the current negotiation
       const negotiation = await prisma.negotiation.findUnique({
         where: { id: negotiationId },

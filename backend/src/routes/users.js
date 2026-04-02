@@ -13,13 +13,21 @@ const {
 } = require("../controllers/userController");
 const { jwtAuth } = require("../middleware/auth");
 const { uploadAvatar, uploadResume } = require("../middleware/upload");
+const { authLimiter, uploadLimiter } = require("../middleware/rateLimit");
+const { validate } = require("../middleware/validate");
+const {
+  registerUserSchema,
+  updateUserSchema,
+  updateSuspendSchema,
+  updateAvailabilitySchema,
+} = require("../validators/userSchemas");
 
 const router = express.Router();
 
 // upload or replace avatar for authenticated user
 router
   .route("/me/avatar")
-  .put(jwtAuth, uploadAvatar.single("file"), uploadUserAvatar)
+  .put(jwtAuth, uploadLimiter, uploadAvatar.single("file"), uploadUserAvatar)
   .all((req, res) => {
     res.status(405).json({ error: "Method Not Allowed" });
   });
@@ -27,7 +35,7 @@ router
 // upload or replace resume for authenticated user
 router
   .route("/me/resume")
-  .put(jwtAuth, uploadResume.single("file"), uploadUserResume)
+  .put(jwtAuth, uploadLimiter, uploadResume.single("file"), uploadUserResume)
   .all((req, res) => {
     res.status(405).json({ error: "Method Not Allowed" });
   });
@@ -35,7 +43,7 @@ router
 // set the suspended status of a regular user
 router
   .route("/:userId/suspended")
-  .patch(jwtAuth, updateUserSuspend)
+  .patch(jwtAuth, validate(updateSuspendSchema), updateUserSuspend)
   .all((req, res) => {
     res.status(405).json({ error: "Method Not Allowed" });
   });
@@ -43,7 +51,7 @@ router
 // update availability status of user
 router
   .route("/me/available")
-  .patch(jwtAuth, updateUserAvailability)
+  .patch(jwtAuth, validate(updateAvailabilitySchema), updateUserAvailability)
   .all((req, res) => {
     res.status(405).json({ error: "Method Not Allowed" });
   });
@@ -69,7 +77,7 @@ router
 router
   .route("/me")
   .get(jwtAuth, getUser)
-  .patch(jwtAuth, updateUser)
+  .patch(jwtAuth, validate(updateUserSchema), updateUser)
   .all((req, res) => {
     res.status(405).json({ error: "Method Not Allowed" });
   });
@@ -78,7 +86,7 @@ router
 // retrieve a list of regular users
 router
   .route("/")
-  .post(registerUser)
+  .post(authLimiter, validate(registerUserSchema), registerUser)
   .get(jwtAuth, getUsers)
   .all((req, res) => {
     res.status(405).json({ error: "Method Not Allowed" });

@@ -1,12 +1,11 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
-require("dotenv").config();
-
 const { PrismaClient } = require("@prisma/client");
 const { isValidPassword } = require("../helpers/validation");
 const encodePassword = require("../helpers/encodePassword");
 const prisma = new PrismaClient();
 const system = require("../config/system");
+const config = require("../config/env");
 
 const resetRequests = {};
 
@@ -40,7 +39,7 @@ class AuthService {
         accountId: account.id,
         role: account.role,
       },
-      process.env.JWT_SECRET,
+      config.jwtSecret,
       { expiresIn: "24h" }
     );
 

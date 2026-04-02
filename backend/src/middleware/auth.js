@@ -1,10 +1,9 @@
 const jwt = require("jsonwebtoken");
-require("dotenv").config();
-
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
+const config = require("../config/env");
 
-const SECRET_KEY = process.env.JWT_SECRET || "test_secret";
+const SECRET_KEY = config.jwtSecret;
 
 const jwtAuth = (req, res, next) => {
   // extract token from request header

@@ -9,11 +9,12 @@ const jobRoutes = require("./routes/jobs");
 const qualificationRoutes = require("./routes/qualifications");
 const systemsRoutes = require("./routes/system");
 const negotiationRoutes = require("./routes/negotiations");
-require("dotenv").config();
-
 const cors = require("cors");
+const helmet = require("helmet");
+const config = require("./config/env");
+const { globalLimiter } = require("./middleware/rateLimit");
 
-const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
+const FRONTEND_URL = config.frontendUrl;
 
 function create_app() {
   const app = express();
@@ -28,7 +29,15 @@ function create_app() {
     })
   );
 
-  app.use(express.json());
+  // security headers
+  app.use(helmet());
+
+  // parse json with size limit to prevent oversized payloads
+  app.use(express.json({ limit: "1mb" }));
+
+  // global rate limit fallback — all routes
+  app.use(globalLimiter);
+
   app.use("/auth", authRoutes);
   app.use("/users", userRoutes);
   app.use("/businesses", businessRoutes);
@@ -37,6 +46,14 @@ function create_app() {
   app.use("/qualifications", qualificationRoutes);
   app.use("/system", systemsRoutes);
   app.use("/negotiations", negotiationRoutes);
+
+  // handle multer file size errors
+  app.use((err, req, res, next) => {
+    if (err.code === "LIMIT_FILE_SIZE") {
+      return res.status(413).json({ error: "File too large" });
+    }
+    next(err);
+  });
 
   // route has no matches
   app.use((req, res) => {

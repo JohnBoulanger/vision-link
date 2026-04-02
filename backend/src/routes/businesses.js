@@ -14,6 +14,15 @@ const {
 } = require("../controllers/businessController");
 const { jwtAuth, optionalAuth } = require("../middleware/auth");
 const { uploadAvatar } = require("../middleware/upload");
+const { authLimiter, publicLimiter, uploadLimiter } = require("../middleware/rateLimit");
+const { validate } = require("../middleware/validate");
+const {
+  registerBusinessSchema,
+  updateBusinessSchema,
+  verifyBusinessSchema,
+  createJobSchema,
+  updateJobSchema,
+} = require("../validators/businessSchemas");
 
 const router = express.Router();
 
@@ -21,7 +30,7 @@ const router = express.Router();
 // delete an open or expired job posting
 router
   .route("/me/jobs/:jobId")
-  .patch(jwtAuth, updateJob)
+  .patch(jwtAuth, validate(updateJobSchema), updateJob)
   .delete(jwtAuth, deleteJob)
   .all((req, res) => {
     res.status(405).json({ error: "Method Not Allowed" });
@@ -31,7 +40,7 @@ router
 // get a paginated list of jobs created by the currently logged in business.
 router
   .route("/me/jobs")
-  .post(jwtAuth, createJob)
+  .post(jwtAuth, validate(createJobSchema), createJob)
   .get(jwtAuth, getJobs)
   .all((req, res) => {
     res.status(405).json({ error: "Method Not Allowed" });
@@ -40,7 +49,7 @@ router
 // upload or replace avatar for business
 router
   .route("/me/avatar")
-  .put(jwtAuth, uploadAvatar.single("file"), uploadBusinessAvatar)
+  .put(jwtAuth, uploadLimiter, uploadAvatar.single("file"), uploadBusinessAvatar)
   .all((req, res) => {
     res.status(405).json({ error: "Method Not Allowed" });
   });
@@ -50,7 +59,7 @@ router
 router
   .route("/me")
   .get(jwtAuth, getMyBusiness)
-  .patch(jwtAuth, updateMyBusiness)
+  .patch(jwtAuth, validate(updateBusinessSchema), updateMyBusiness)
   .all((req, res) => {
     res.status(405).json({ error: "Method Not Allowed" });
   });
@@ -58,7 +67,7 @@ router
 // set the verified status of a business
 router
   .route("/:businessId/verified")
-  .patch(jwtAuth, verifyBusiness)
+  .patch(jwtAuth, validate(verifyBusinessSchema), verifyBusiness)
   .all((req, res) => {
     res.status(405).json({ error: "Method Not Allowed" });
   });
@@ -66,7 +75,7 @@ router
 // retrieve a specific business
 router
   .route("/:businessId")
-  .get(optionalAuth, getBusiness)
+  .get(publicLimiter, optionalAuth, getBusiness)
   .all((req, res) => {
     res.status(405).json({ error: "Method Not Allowed" });
   });
@@ -75,8 +84,8 @@ router
 // register a new business account
 router
   .route("/")
-  .get(optionalAuth, getBusinesses)
-  .post(registerBusiness)
+  .get(publicLimiter, optionalAuth, getBusinesses)
+  .post(authLimiter, validate(registerBusinessSchema), registerBusiness)
   .all((req, res) => {
     res.status(405).json({ error: "Method Not Allowed" });
   });
