@@ -20,6 +20,9 @@ const FRONTEND_URL = config.frontendUrl;
 function create_app() {
   const app = express();
 
+  // trust reverse proxy (railway, nginx) so rate limiting uses real client ip
+  app.set("trust proxy", 1);
+
   // Set up cors to allow requests from frontend
   app.use(
     cors({

@@ -30,6 +30,9 @@
     "uuid": "^11.1.0",
     "zod": "^4.3.6"
   },
+  "prisma": {
+    "seed": "node prisma/seed.js"
+  },
   "devDependencies": {
     "prettier": "^3.8.1"
   }
