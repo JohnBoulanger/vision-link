@@ -43,8 +43,5 @@ frontend/public/uploads/
 # Playwright MCP
 .playwright-mcp/
 
-# Screenshots
-docs/screenshots/
-
 # OS / misc
 Thumbs.db
