@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import axios from "axios";
 import api from "../../../utils/api";
 import LoadingSpinner from "../../../components/LoadingSpinner";
+import Pagination from "../../../components/Pagination";
 import "./style.css";
 
 interface PositionType {
@@ -13,6 +14,8 @@ interface PositionType {
 
 export default function RegularPositionTypes() {
   const [positionTypes, setPositionTypes] = useState<PositionType[]>([]);
+  const [count, setCount] = useState(0);
+  const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -22,10 +25,18 @@ export default function RegularPositionTypes() {
   const [createError, setCreateError] = useState<Record<number, string>>({});
   const [createSuccess, setCreateSuccess] = useState<Record<number, boolean>>({});
 
+  const limit = 10;
+  const totalPages = Math.ceil(count / limit);
+
+  // fetch position types with pagination
   useEffect(() => {
+    setLoading(true);
     api
-      .get("/position-types")
-      .then((res) => setPositionTypes(res.data.results ?? res.data))
+      .get("/position-types", { params: { page, limit } })
+      .then((res) => {
+        setPositionTypes(res.data.results ?? res.data);
+        setCount(res.data.count ?? 0);
+      })
       .catch((err) => {
         setError(
           axios.isAxiosError(err)
@@ -34,7 +45,7 @@ export default function RegularPositionTypes() {
         );
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [page]);
 
   // submit a new qualification request for a position type
   async function handleCreate(positionTypeId: number) {
@@ -72,63 +83,66 @@ export default function RegularPositionTypes() {
       {positionTypes.length === 0 ? (
         <p className="empty-state">No position types available.</p>
       ) : (
-        <div className="pt-list">
-          {positionTypes.map((pt) => (
-            <div key={pt.id} className="pt-card">
-              <div className="pt-card-body">
-                <h2>{pt.name}</h2>
-                {pt.description && <p className="pt-description">{pt.description}</p>}
-              </div>
+        <>
+          <div className="pt-list">
+            {positionTypes.map((pt) => (
+              <div key={pt.id} className="pt-card">
+                <div className="pt-card-body">
+                  <h2>{pt.name}</h2>
+                  {pt.description && <p className="pt-description">{pt.description}</p>}
+                </div>
 
-              <div className="pt-card-actions">
-                {/* show inline create form when this card is selected */}
-                {creating === pt.id ? (
-                  <div className="pt-create-form">
-                    {createError[pt.id] && (
-                      <p className="error-message">{createError[pt.id]}</p>
-                    )}
-                    <textarea
-                      className="pt-note-input"
-                      placeholder="Optional note for the reviewer..."
-                      value={createNote}
-                      onChange={(e) => setCreateNote(e.target.value)}
-                      rows={2}
-                    />
-                    <div className="pt-create-actions">
-                      <button
-                        className="btn-primary btn-sm"
-                        onClick={() => handleCreate(pt.id)}
-                      >
-                        Submit request
-                      </button>
-                      <button
-                        className="btn-secondary btn-sm"
-                        onClick={() => {
-                          setCreating(null);
-                          setCreateNote("");
-                        }}
-                      >
-                        Cancel
-                      </button>
+                <div className="pt-card-actions">
+                  {/* show inline create form when this card is selected */}
+                  {creating === pt.id ? (
+                    <div className="pt-create-form">
+                      {createError[pt.id] && (
+                        <p className="error-message">{createError[pt.id]}</p>
+                      )}
+                      <textarea
+                        className="pt-note-input"
+                        placeholder="Optional note for the reviewer..."
+                        value={createNote}
+                        onChange={(e) => setCreateNote(e.target.value)}
+                        rows={2}
+                      />
+                      <div className="pt-create-actions">
+                        <button
+                          className="btn-primary btn-sm"
+                          onClick={() => handleCreate(pt.id)}
+                        >
+                          Submit request
+                        </button>
+                        <button
+                          className="btn-secondary btn-sm"
+                          onClick={() => {
+                            setCreating(null);
+                            setCreateNote("");
+                          }}
+                        >
+                          Cancel
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                ) : createSuccess[pt.id] ? (
-                  <span className="pt-success">
-                    Request submitted —{" "}
-                    <Link to="/qualifications">view qualifications</Link>
-                  </span>
-                ) : (
-                  <button
-                    className="btn-secondary btn-sm"
-                    onClick={() => setCreating(pt.id)}
-                  >
-                    Request qualification
-                  </button>
-                )}
+                  ) : createSuccess[pt.id] ? (
+                    <span className="pt-success">
+                      Request submitted —{" "}
+                      <Link to="/qualifications">view qualifications</Link>
+                    </span>
+                  ) : (
+                    <button
+                      className="btn-secondary btn-sm"
+                      onClick={() => setCreating(pt.id)}
+                    >
+                      Request qualification
+                    </button>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+          <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+        </>
       )}
     </div>
   );

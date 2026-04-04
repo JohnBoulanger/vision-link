@@ -191,9 +191,9 @@ class PositionTypeService {
       throw { type: "not_found" };
     }
 
-    // check qualifications
+    // only block deletion if there are approved qualifications
     const qualificationCount = await prisma.qualification.count({
-      where: { positionTypeId },
+      where: { positionTypeId, status: "approved" },
     });
 
     if (qualificationCount > 0) {

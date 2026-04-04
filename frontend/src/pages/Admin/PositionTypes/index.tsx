@@ -46,8 +46,8 @@ export default function AdminPositionTypes() {
 
   // create form
   const [showCreate, setShowCreate] = useState(false);
-  // hidden defaults to true — new position types should be hidden until admin unhides them
-  const [createForm, setCreateForm] = useState({ name: "", description: "", hidden: true });
+  // hidden defaults to false so new position types are visible to users immediately
+  const [createForm, setCreateForm] = useState({ name: "", description: "", hidden: false });
   const [createPending, setCreatePending] = useState(false);
   const [createError, setCreateError] = useState("");
 

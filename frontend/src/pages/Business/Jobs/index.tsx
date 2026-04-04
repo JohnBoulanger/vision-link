@@ -164,13 +164,15 @@ export default function BusinessJobs() {
 
           <select value={sortField} onChange={(e) => setSortField(e.target.value)}>
             <option value="start_time">Start date</option>
+            <option value="end_time">End date</option>
             <option value="salary_min">Min salary</option>
             <option value="salary_max">Max salary</option>
-            <option value="updatedAt">Recently updated</option>
+            <option value="createdAt">Date posted</option>
+            <option value="updatedAt">Last updated</option>
           </select>
           <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value)}>
-            <option value="desc">Newest first</option>
-            <option value="asc">Oldest first</option>
+            <option value="desc">Descending</option>
+            <option value="asc">Ascending</option>
           </select>
         </div>
       </div>

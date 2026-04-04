@@ -509,13 +509,19 @@ class BusinessService {
   }
 
   static async getJobs(data, businessId) {
-    const { start_time, end_time, status } = data;
+    const { start_time, end_time, status, sort, order } = data;
     const position_type_id = parseInt(data.position_type_id);
     const salary_min = parseInt(data.salary_min);
     const salary_max = parseInt(data.salary_max);
     const page = parseInt(data.page) || 1;
     const limit = parseInt(data.limit) || 10;
     const skip = (page - 1) * limit;
+
+    // validate and build orderBy
+    const allowedSortFields = ["start_time", "end_time", "salary_min", "salary_max", "updatedAt", "createdAt"];
+    const allowedOrders = ["asc", "desc"];
+    const sortField = allowedSortFields.includes(sort) ? sort : "start_time";
+    const sortOrder = allowedOrders.includes(order) ? order : "desc";
 
     // if start and end times are provided, check that they are valid
     const start = start_time ? new Date(start_time) : undefined;
@@ -561,6 +567,7 @@ class BusinessService {
       where,
       take: limit,
       skip,
+      orderBy: { [sortField]: sortOrder },
       include: {
         positionType: true,
         worker: true,
