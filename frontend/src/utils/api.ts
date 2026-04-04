@@ -1,7 +1,9 @@
 import axios from "axios";
 
+// in production the frontend is served from the same origin as the backend,
+// so baseURL is just "/api". in development VITE_BACKEND_URL points to localhost:3000.
 const api = axios.create({
-  baseURL: import.meta.env.VITE_BACKEND_URL,
+  baseURL: `${import.meta.env.VITE_BACKEND_URL || ""}/api`,
 });
 
 api.interceptors.request.use((config) => {
@@ -18,7 +20,7 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     const url = error.config?.url || "";
-    const isAuthRoute = url.startsWith("/auth/");
+    const isAuthRoute = url.startsWith("/auth/") || url.startsWith("/api/auth/");
     if (error.response?.status === 401 && !isAuthRoute) {
       localStorage.removeItem("token");
       window.location.href = "/login";

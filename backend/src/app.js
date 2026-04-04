@@ -64,14 +64,15 @@ function create_app() {
   // global rate limit fallback — all routes
   app.use(globalLimiter);
 
-  app.use("/auth", authRoutes);
-  app.use("/users", userRoutes);
-  app.use("/businesses", businessRoutes);
-  app.use("/position-types", positionTypeRoutes);
-  app.use("/jobs", jobRoutes);
-  app.use("/qualifications", qualificationRoutes);
-  app.use("/system", systemsRoutes);
-  app.use("/negotiations", negotiationRoutes);
+  // all api routes live under /api so they don't collide with frontend spa routes
+  app.use("/api/auth", authRoutes);
+  app.use("/api/users", userRoutes);
+  app.use("/api/businesses", businessRoutes);
+  app.use("/api/position-types", positionTypeRoutes);
+  app.use("/api/jobs", jobRoutes);
+  app.use("/api/qualifications", qualificationRoutes);
+  app.use("/api/system", systemsRoutes);
+  app.use("/api/negotiations", negotiationRoutes);
 
   // handle multer file size errors
   app.use((err, req, res, next) => {
@@ -90,7 +91,7 @@ function create_app() {
 
   // spa fallback — send index.html for non-api GET requests so react router works
   app.use((req, res, next) => {
-    if (req.method === "GET" && !req.path.startsWith("/uploads")) {
+    if (req.method === "GET" && !req.path.startsWith("/uploads") && !req.path.startsWith("/api")) {
       return res.sendFile(path.join(frontendDist, "index.html"), (err) => {
         if (err) next();
       });
