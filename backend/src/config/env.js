@@ -20,6 +20,8 @@ function requireEnv(name) {
 
 const config = Object.freeze({
   jwtSecret: requireEnv("JWT_SECRET"),
+  // in production (single-service deploy) frontend is served from the same origin,
+  // so FRONTEND_URL can be the railway public url or left unset for same-origin
   frontendUrl: process.env.FRONTEND_URL || "http://localhost:5173",
   nodeEnv: process.env.NODE_ENV || "development",
 });
