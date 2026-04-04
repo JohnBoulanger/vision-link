@@ -1,192 +1,35 @@
-# DentaLink — Installation & Deployment Guide
+Attribution
+- All wireframe design, UI structure, and API integration written by me
+- Code snippets referenced from GeeksforGeeks and Claude AI (Anthropic) for utility logic, patterns, and as reference sources for external library use
+- UI polish and refinement and refactors assisted by Claude AI tool
+- Additional packages (helmet, express-rate-limit) added to the backend for security improvements
+- All packages are listed in package.json and installed via npm install
 
-## Prerequisites
+Prerequisites
+- Node.js 22+
+- npm (comes with Node.js)
 
-- Node.js >= 22.12.0 (22.16.0+ recommended)
-- npm >= 10
-- Git
+Backend Setup
+1. cd backend
+2. npm install
+3. npx prisma generate
+4. npx prisma db push
+5. npx prisma db seed
+6. node --watch src/server.js 3000
 
-## Local Development Setup
+Frontend Setup
+1. cd frontend
+2. npm install
+3. npm run dev (development, runs on port 5173)
+4. npm run build (production, outputs to frontend/dist)
 
-### 1. Clone the repository
+Deployment
+- Hosted on Railway using Docker (see Dockerfile and railway.json)
+- Railway builds the Docker image, which installs dependencies, builds the frontend, and starts the backend
+- The backend serves the built frontend static files, the API, and Socket.IO on a single port
+- Railway sets the PORT environment variable automatically
 
-```bash
-git clone <repository-url>
-cd A3
-```
-
-### 2. Backend setup
-
-```bash
-cd backend
-npm install
-```
-
-Create a `.env` file in `backend/` (see `.env.example`):
-
-```
-JWT_SECRET=<any-random-string-for-local-dev>
-FRONTEND_URL=http://localhost:5173
-NODE_ENV=development
-```
-
-Generate the Prisma client, push the schema to SQLite, and seed the database:
-
-```bash
-npx prisma generate
-npx prisma db push
-npx prisma db seed
-```
-
-Start the backend server (runs on port 3000):
-
-```bash
-npm run start:local
-```
-
-### 3. Frontend setup
-
-Open a second terminal:
-
-```bash
-cd frontend
-npm install
-```
-
-Create a `.env` file in `frontend/`:
-
-```
-VITE_BACKEND_URL="http://localhost:3000"
-```
-
-Start the Vite dev server (runs on port 5173):
-
-```bash
-npm run dev
-```
-
-Visit http://localhost:5173 in your browser.
-
-## Seed Accounts
-
-All passwords are `123123`.
-
-| Role     | Email pattern                          | Count |
-|----------|----------------------------------------|-------|
-| Regular  | regular1@csc309.utoronto.ca ... regular20@ | 20    |
-| Business | business1@csc309.utoronto.ca ... business10@ | 10   |
-| Admin    | admin1@csc309.utoronto.ca              | 1     |
-
-## Packages Used
-
-### Backend (`backend/package.json`)
-
-| Package             | Purpose                                    |
-|---------------------|--------------------------------------------|
-| express             | HTTP server framework                      |
-| @prisma/client      | Database ORM (SQLite)                      |
-| prisma              | Schema management and migrations           |
-| bcrypt              | Password hashing                           |
-| jsonwebtoken        | JWT token creation and verification        |
-| express-jwt         | JWT middleware for route protection         |
-| cors                | Cross-origin request handling              |
-| helmet              | Security response headers                  |
-| express-rate-limit  | Rate limiting middleware                   |
-| zod                 | Schema-based input validation              |
-| multer              | File upload handling (avatars, resumes)     |
-| socket.io           | Real-time WebSocket communication          |
-| dotenv              | Environment variable loading               |
-| uuid                | Unique ID generation                       |
-| sqlite3             | SQLite database driver                     |
-
-NOTE: Backend packages were added AFTER A2 submission and were not present in A2
-These were added for additional security as I want to present this project in my portfolio
-and adding these would improve that
-
-### Frontend (`frontend/package.json`)
-
-| Package             | Purpose                                    |
-|---------------------|--------------------------------------------|
-| react               | UI framework                               |
-| react-dom           | React DOM renderer                         |
-| react-router-dom    | Client-side routing                        |
-| axios               | HTTP client for API requests               |
-| socket.io-client    | WebSocket client for negotiations          |
-| leaflet             | Map rendering for business locations       |
-| react-leaflet       | React bindings for Leaflet maps            |
-
-## Deployment (Railway — PaaS)
-
-The application is deployed as a single service on Railway. The Express
-backend serves both the API and the React static build, so only one
-service is needed.
-
-### Environment
-
-- Platform: Railway (free tier)
-- Runtime: Node.js 22 (via Docker `node:22-slim`)
-- Database: SQLite (ephemeral — reseeds on every deploy)
-- Build: Custom Dockerfile at project root
-
-### How it works
-
-1. The `Dockerfile` installs dependencies for both frontend and backend.
-2. The frontend is built with `npm run build` (Vite outputs to `frontend/dist/`).
-3. Prisma client is generated at build time.
-4. At container startup (`CMD`), the database is created (`prisma db push`),
-   seeded (`prisma db seed`), and then the Express server starts.
-5. Express serves the API on its normal routes and the React static build
-   on all other GET requests (SPA fallback).
-
-### Railway deployment steps
-
-1. Create a Railway account at https://railway.com and link your GitHub repo.
-2. Create a new project and add a service pointed at the repository root.
-3. Railway will auto-detect the `Dockerfile` and `railway.json` config.
-4. Set the following environment variables in the Railway service settings:
-
-   ```
-   JWT_SECRET=<strong-random-hex-string>
-   FRONTEND_URL=https://<your-app>.up.railway.app
-   NODE_ENV=production
-   PORT=3000
-   ```
-
-5. Generate a domain under the service's Settings > Networking > Public Networking.
-   Use port 3000 for the domain.
-6. Deploy. Railway builds the Docker image and starts the container.
-7. The database seeds automatically on every deploy/restart.
-
-### Current deployment
-
-- URL: https://dentalink-production-ceda.up.railway.app
-- The SQLite database and uploaded files are ephemeral (reset on redeploy).
-  This is acceptable per A3 requirements.
-
-## Alternative: Manual Deployment (Ubuntu VPS / EC2)
-
-If deploying to a bare VM instead of Railway:
-
-1. Provision an Ubuntu 24.04 instance (e.g., AWS EC2 free tier).
-2. Install Node.js 22.x:
-   ```bash
-   curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
-   sudo apt-get install -y nodejs
-   ```
-3. Clone the repo and follow the "Local Development Setup" steps above.
-4. Set `NODE_ENV=production` and `FRONTEND_URL=http://<your-ip>:3000`.
-5. Build the frontend:
-   ```bash
-   cd frontend && npm install && npm run build && cd ..
-   ```
-6. Start with PM2:
-   ```bash
-   sudo npm install -g pm2
-   cd backend
-   npx prisma generate && npx prisma db push && npx prisma db seed
-   pm2 start src/server.js -- 3000
-   pm2 save && pm2 startup
-   ```
-7. (Optional) Set up Nginx as a reverse proxy on port 80/443 and use
-   Certbot for HTTPS.
- etc) etc)
+Environment
+- Backend uses SQLite 
+- Backend serves uploaded files from its own /uploads directory
+- Set JWT_SECRET environment variable for production
